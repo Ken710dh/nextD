@@ -22,7 +22,7 @@
   margin-bottom: 1.5rem;
 }
 
-.form-group {
+.formGroup {
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
@@ -39,6 +39,7 @@
 }
 
 .input {
+  box-shadow: none !important;
   width: 100%;
   padding: 0.5rem 0.75rem;
   border: 1px solid #d1d5db;
@@ -47,11 +48,6 @@
   font-size: 1rem;
 }
 
-.input:focus {
-  outline: none;
-  border-color: #8e8f91;
-  box-shadow: none;
-}
 
 .button {
   width: 100%;
@@ -69,7 +65,7 @@
   background-color: #2563eb;
 }
 
-.footer-text {
+.footerText {
   margin-top: 1rem;
   text-align: center;
   font-size: 0.875rem;
@@ -84,4 +80,10 @@
 
 .link:hover {
   text-decoration: underline;
+}
+.error{
+  color: rgb(226, 70, 8);
+}
+.errorBorder{
+  border: 1px solid rgb(226, 70, 8);
 }
