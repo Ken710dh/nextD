@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { User } from "./type"
+import Table from "components/table"
+import { HEADER_FIELD } from "./constants"
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([])
@@ -15,16 +17,12 @@ export default function Users() {
     fetchUsers()
   }, [])
     
+
   return (
     <main className="p-">
-      <div>Hello User</div>
-      <div>{users.map((user: any, index)=>(
-        <div key={index}>
-          <h3>{user.name}</h3>
-          <p>{user.username}</p>
-          <p>{user.email}</p>
-        </div>
-      ))}</div>
+      <div>Hello User
+      <Table header={HEADER_FIELD} data={users} />
+      </div>
     </main>
   )
 }
