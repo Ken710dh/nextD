@@ -15,6 +15,8 @@ export interface TableHeaderProps {
   header: string ;
   width?: string;
   isCellTable?: boolean;
+  minWidth?: string;
+  maxWidth?: string;
   label?: string;
   cellTable?: React.ReactNode[]
 }

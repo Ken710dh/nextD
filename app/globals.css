@@ -1,9 +1,10 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
 :root {
   --foreground-rgb: 0, 0, 0;
+  --text-color-1: rgba(45, 55, 72, 1);
+  --font-sans: "Nunito", sans-serif;
+  --background-color-1: rgba(226, 232, 240, 1);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -11,6 +12,7 @@
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
+    --text-color-1: rgba(45, 55, 72, 1);
   }
 }
 

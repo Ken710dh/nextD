@@ -1,65 +1,111 @@
-<!DOCTYPE html>  
-<html lang="vi">  
-<head>  
-    <meta charset="UTF-8">  
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-    <title>Bảng có V với Header Sticky</title>  
-    <style>  
-        body {  
-            font-family: Arial, sans-serif;  
-            margin: 0;  
-            padding: 20px;  
-            background-color: #f4f4f4;  
-        }  
-        .table-container {  
-            max-height: 300px; /* Chiều cao tối đa của vùng chứa bảng */  
-            overflow-y: auto;  /* Cuộn dọc nếu bảng vượt quá chiều cao */  
-            border: 1px solid #ccc; /* Đường viền cho bảng */  
-            background-color: #fff;  
-        }  
-        table {  
-            width: 100%;  
-            border-collapse: collapse;  
-        }  
-        th, td {  
-            border: 1px solid #000;  
-            padding: 10px;  
-            text-align: center;  
-        }  
-        th {  
-            background-color: #f2f2f2;  
-            position: sticky; /* Đặt vị trí của tiêu đề */  
-            top: 0; /* Vị trí cố định từ trên xuống */  
-            z-index: 10; /* Đảm bảo tiêu đề nằm trên các ô khác */  
-        }  
-    </style>  
-</head>  
-<body>  
-    <h1>Bảng có V với Header Sticky</h1>  
-    <div class="table-container">  
-        <table>  
-            <tr>  
-                <th>STT</th>  
-                <th>Tên</th>  
-                <th>Giá trị</th>  
-            </tr>  
-            <!-- Dữ liệu bổ sung để có thể cuộn bảng -->  
-            <tr><td>1</td><td>V1</td><td>10</td></tr>  
-            <tr><td>2</td><td>V2</td><td>20</td></tr>  
-            <tr><td>3</td><td>V3</td><td>30</td></tr>  
-            <tr><td>4</td><td>V4</td><td>40</td></tr>  
-            <tr><td>5</td><td>V5</td><td>50</td></tr>  
-            <tr><td>6</td><td>V6</td><td>60</td></tr>  
-            <tr><td>7</td><td>V7</td><td>70</td></tr>  
-            <tr><td>8</td><td>V8</td><td>80</td></tr>  
-            <tr><td>9</td><td>V9</td><td>90</td></tr>  
-            <tr><td>10</td><td>V10</td><td>100</td></tr>  
-            <tr><td>11</td><td>V11</td><td>110</td></tr>  
-            <tr><td>12</td><td>V12</td><td>120</td></tr>  
-            <tr><td>13</td><td>V13</td><td>130</td></tr>  
-            <tr><td>14</td><td>V14</td><td>140</td></tr>  
-            <tr><td>15</td><td>V15</td><td>150</td></tr>  
-        </table>  
-    </div>  
-</body>  
-</html>  
+<html>
+
+<head>
+    <title>
+        Display table with vertical scrollbar
+    </title>
+
+    <style>
+        table.scrolldown {
+            width: 100%;
+
+            /* border-collapse: collapse; */
+            border-spacing: 0;
+            border: 2px solid black;
+        }
+
+        /* To display the block as level element */
+        table.scrolldown tbody,
+        table.scrolldown thead {
+            display: block;
+        }
+
+        thead tr th {
+            height: 40px;
+            line-height: 40px;
+        }
+
+        table.scrolldown tbody {
+
+            /* Set the height of table body */
+            height: 50px;
+
+            /* Set vertical scroll */
+            overflow-y: auto;
+
+            /* Hide the horizontal scroll */
+            overflow-x: hidden;
+        }
+
+        tbody {
+            border-top: 2px solid black;
+        }
+
+        tbody td,
+        thead th {
+            width: 200px;
+            border-right: 2px solid black;
+        }
+
+        td {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <table class="scrolldown">
+
+        <!-- Table head content -->
+        <thead>
+            <tr>
+                <th>Heading 1</th>
+                <th>Heading 2</th>
+                <th>Heading 3</th>
+                <th>Heading 4</th>
+                <th>Heading 5</th>
+            </tr>
+        </thead>
+
+        <!-- Table body content -->
+        <tbody>
+            <tr>
+                <td>Content</td>
+                <td>Content</td>
+                <td>Content</td>
+                <td>Content</td>
+                <td>Content</td>
+            </tr>
+
+            <tr>
+                <td>Content</td>
+                <td>Content</td>
+                <td>Content</td>
+                <td>Content</td>
+                <td>Content</td>
+            </tr>
+            <tr>
+                <td>Content</td>
+                <td>Content</td>
+                <td>Content</td>
+                <td>Content</td>
+                <td>Content</td>
+            </tr>
+            <tr>
+                <td>Content</td>
+                <td>Content</td>
+                <td>Content</td>
+                <td>Content</td>
+                <td>Content</td>
+            </tr>
+            <tr>
+                <td>Content</td>
+                <td>Content</td>
+                <td>Content</td>
+                <td>Content</td>
+                <td>Content</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <body>
