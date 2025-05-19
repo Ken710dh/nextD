@@ -1,0 +1,10 @@
+*.txt text eol=lf
+*.js text eol=lf
+*.css text eol=lf
+*.svg text eol=lf
+package-lock.json text eol=lf
+tsconfig.json text eol=lf
+app/globals.css text eol=lf
+.gitattributes text eol=lf
+*.mjs text eol=lf
+* text eol=crlf
