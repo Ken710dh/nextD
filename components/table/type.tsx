@@ -8,16 +8,19 @@ export interface TableProps {
   failedDataMessage?: string;
 }
 
+type RowValue = string | number | React.ReactElement;
 /**
  * Interface for return the table header type props
  */
-export interface TableHeaderProps {
-  header: string ;
+
+export type TableHeaderProps<TRow extends Record<string, RowValue> = Record<string, RowValue>> = {
+  header: string;
+  label?: string;
   width?: string;
   isCellTable?: boolean;
-  label?: string;
-  cellTable?: React.ReactNode[]
-}
+  cellTable?: React.ReactNode;
+  render?: (value: RowValue, row: TRow) => React.ReactNode;
+};
 
 /**
  * Interface for return the table data type props
