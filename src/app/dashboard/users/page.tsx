@@ -1,17 +1,36 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User } from "./type";
-import Table from "components/table";
 import { HEADER_FIELD } from "./constants";
 import { USERS } from "./dummyUser";
+import Table from "@/components/table";
 
 export default function Users() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+    const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.checked) {
+        setSelectedUsers(USERS.map((user) => user.email));
+      } else {
+        setSelectedUsers([]);
+      }
+    };
 
-  const DATA_USERS = USERS.map((user, index) => {
+    const handleItemChange = (item: string) => {
+      setSelectedUsers((prevSelectedUsers) => {
+        if (prevSelectedUsers.includes(item)) {
+          return prevSelectedUsers.filter((user) => user !== item);
+        } else {
+          return [...prevSelectedUsers, item];
+        }
+      })
+    }
+const isAllSelected = selectedUsers.length === USERS.length;
+
+  const DATA_USERS = USERS.map((user) => {
     return {
-      checkbox: <input type="checkbox" />,
+      checkbox: <input type="checkbox" 
+      checked={selectedUsers.includes(user.email)} 
+      onChange={() => handleItemChange(user.email)} />,
       name: user.name,
       email: user.email,
       role: (
@@ -37,7 +56,9 @@ export default function Users() {
     <main className="p-">
       <div>
         Hello User
-        <Table header={HEADER_FIELD} data={DATA_USERS} />
+        <Table header={HEADER_FIELD} data={DATA_USERS} 
+        checked={isAllSelected} 
+        handleAllItemSelect={handleSelectAll} />
       </div>
     </main>
   );
