@@ -3,7 +3,6 @@ import { Button } from "@radix-ui/themes";
 import { Dialog } from "radix-ui";
 import React from "react";
 export default function UserProfileDialog() {
-  const [close, setClose] = React.useState(false);
   const user = {
     name: "Lê Minh Tuấn",
     email: "tuan.le@example.com",
@@ -12,13 +11,9 @@ export default function UserProfileDialog() {
     phone: "0987 654 321",
     role: "Admin",
   };
-
-  function handleClose() {
-    setClose(true);
-  }
   return (  
     <>
-  <div className="w-full max-w-md mx-auto bg-white p-6 rounded-xl shadow space-y-6">
+    <div className="w-full max-w-md mx-auto bg-white p-6 rounded-xl shadow space-y-6">
       <div className="flex flex-col items-center text-center">
         <img
           src={user.avatarUrl}
@@ -36,6 +31,7 @@ export default function UserProfileDialog() {
       </div>
       <Dialog.Close>Cancel</Dialog.Close>
     </div>
+
     </>
   );
 }
