@@ -4,11 +4,17 @@ import { useEffect, useState } from "react";
 import { HEADER_FIELD } from "./constants";
 import { USERS } from "./dummyUser";
 import Table from "@/components/table";
+import CustomCheckbox from "@/components/checkbox";
+import Image from "next/image";
+import Edit from "@/assets/edit-icon.svg";
+import Delete from "@/assets/delete-icon.svg";
+import { EditModal } from "@/components/editDialog";
+import UserProfileDialog from "@/components/userProfileDialog";
 
 export default function Users() {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-    const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.checked) {
+    const handleSelectAll = (checked: boolean | 'indeterminate') => {
+      if (checked === true) {
         setSelectedUsers(USERS.map((user) => user.email));
       } else {
         setSelectedUsers([]);
@@ -28,9 +34,10 @@ const isAllSelected = selectedUsers.length === USERS.length;
 
   const DATA_USERS = USERS.map((user) => {
     return {
-      checkbox: <input type="checkbox" 
-      checked={selectedUsers.includes(user.email)} 
-      onChange={() => handleItemChange(user.email)} />,
+      checkbox: <CustomCheckbox 
+        checked={selectedUsers.includes(user.email)} 
+        onCheckedChange={() => handleItemChange(user.email)} 
+      />,
       name: user.name,
       email: user.email,
       role: (
@@ -46,9 +53,10 @@ const isAllSelected = selectedUsers.length === USERS.length;
       created: user.created,
       lastLogin: user.lastLogin,
       action: (
-        <button className="bg-blue-500 text-white px-4 py-2 rounded">
-          Edit
-        </button>
+        <div className="flex gap-2 px-0 align-center">
+          <EditModal dataDialog = {<UserProfileDialog />} />
+          <Image src={Delete} width={24} height={24} alt="delete"/>
+        </div>
       ),
     };
   });

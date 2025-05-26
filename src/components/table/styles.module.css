@@ -43,12 +43,21 @@
     text-align: left;
     overflow-wrap: break-word;
     height: 50px;
+    padding: 10px 12px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    
   }
 .tableHeaderCell:last-child,
 .tableItem:last-child {
   border-right: none;
 }
 
+.tableHeaderCell:nth-child(2),
+.tableItem:nth-child(2) {
+  max-width: 139px;
+}
 /* Bỏ viền dưới ở hàng cuối cùng */
 .tableRow:last-child{
   border-bottom: none;

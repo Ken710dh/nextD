@@ -6,8 +6,8 @@ export interface TableProps {
   data: RowData[];
   border?: string;
   failedDataMessage?: string;
-  checked?: boolean
-  handleAllItemSelect?: (e: React.ChangeEvent<HTMLInputElement>) => void
+  checked: boolean
+  handleAllItemSelect: (checked: boolean) => void
   handleItemChange?: (item: string) => void
 }
 

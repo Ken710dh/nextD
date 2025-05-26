@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { TableHeaderProps, TableProps } from "./type";
 // import style css 
 import styles from './styles.module.css';
+import CustomCheckbox from "../checkbox";
 export default function Table({ header, data, failedDataMessage, checked, handleAllItemSelect }: TableProps) {
 
   //check if the table has a vertical scroll
@@ -12,7 +13,6 @@ export default function Table({ header, data, failedDataMessage, checked, handle
     const tbody = document.querySelector("tbody");
     if (tbody) {
       const isOverflow = tbody.scrollHeight > tbody.clientHeight;
-      console.log(isOverflow)
       setIsScrollY(isOverflow ? true : false);
     }
   }, [data]);
@@ -52,7 +52,6 @@ export default function Table({ header, data, failedDataMessage, checked, handle
   }
 
   const getCellStyling = (header: TableHeaderProps, isLastCell: boolean = false) => {
-    console.log(changeLastCellStyling(isLastCell, header))
     return {
       ...changeLastCellStyling(isLastCell, header),
       flex: '0 0 auto',
@@ -66,10 +65,9 @@ export default function Table({ header, data, failedDataMessage, checked, handle
           {header.map((item, index) => (
             <th className={styles.tableHeaderCell} style={getCellStyling(item, header.length - 1 === index)} key={item.header}>
               {item.header === "checkbox" ? (
-                <input
-                  type="checkbox"
+                <CustomCheckbox
                   checked={checked}
-                  onChange={handleAllItemSelect}
+                  onCheckedChange ={handleAllItemSelect}
                 />
               ) : (
                 item.isCellTable ? item.cellTable : item.label
