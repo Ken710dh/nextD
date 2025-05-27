@@ -1,9 +1,19 @@
 'use client'
 import React, { useEffect } from "react";
 import { TableHeaderProps, TableProps } from "./type";
-// import style css 
 import styles from './styles.module.css';
 import CustomCheckbox from "../checkbox";
+/**
+ * Scrollable table component with sticky headers and "select all" functionality.
+ *
+ * @param {Object} props - Component props
+ * @param {React.ReactNode[]} props.header - The header cells of the table
+ * @param {Object[]} props.data - The data to display in the table rows
+ * @param {string} props.failedDataMessage - Message to show when no data is available
+ * @param {boolean} props.checked - Whether all items are currently selected
+ * @param {(checked: boolean) => void} props.handleAllItemSelect - Callback for toggling all checkboxes
+ * @returns {React.ReactNode} Rendered table component
+ */
 export default function Table({ header, data, failedDataMessage, checked, handleAllItemSelect }: TableProps) {
 
   //check if the table has a vertical scroll

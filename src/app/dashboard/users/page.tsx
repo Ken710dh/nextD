@@ -1,42 +1,107 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { HEADER_FIELD } from "./constants";
 import { USERS } from "./dummyUser";
 import Table from "@/components/table";
 import CustomCheckbox from "@/components/checkbox";
-import Image from "next/image";
-import Edit from "@/assets/edit-icon.svg";
-import Delete from "@/assets/delete-icon.svg";
 import { EditModal } from "@/components/editDialog";
 import UserProfileDialog from "@/components/userProfileDialog";
+import DeleteUserModal from "@/components/deleteUserModal";
 
+/**
+ * A dashboard page for users.
+ *
+ * This page will display a table with the information of all users. The user can
+ * select multiple users and delete them. The user can also edit the information
+ * of a user.
+ *
+ * @returns A React component that renders the users table.
+ */
 export default function Users() {
+  // State to manage selected users
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-    const handleSelectAll = (checked: boolean | 'indeterminate') => {
-      if (checked === true) {
-        setSelectedUsers(USERS.map((user) => user.email));
-      } else {
-        setSelectedUsers([]);
-      }
-    };
+  // State to manage the open state of edit
+  const [openEdit, setOpenEdit] = useState(false);
+  // State to manage the open state of delete
+  const [openDelete, setOpenDelete] = useState(false);
 
-    const handleItemChange = (item: string) => {
-      setSelectedUsers((prevSelectedUsers) => {
-        if (prevSelectedUsers.includes(item)) {
-          return prevSelectedUsers.filter((user) => user !== item);
-        } else {
-          return [...prevSelectedUsers, item];
-        }
-      })
+/**
+ * Opens the edit modal by setting the `openEdit` state to true.
+ */
+  function handleOpenEdit() {
+    setOpenEdit(true)
+  }
+
+/**
+ * Opens the delete modal by setting the `openDelete` state to true and logs the state of the modal.
+ */
+  function handleOpenDelete() {
+    setOpenDelete(true)
+    console.log("Open delete modal", openDelete);
+  }
+  
+/**
+ * Closes the edit modal by setting the `openEdit` state to false.
+ */
+
+  function handleCloseEdit() {
+    setOpenEdit(false)
+  }
+
+  
+/**
+ * Closes the delete modal by setting the `openDelete` state to false and logs the state of the modal.
+ */
+  function handleCloseDelete() {
+    setOpenDelete(false)
+  }
+
+  
+  /**
+   * Handles the select all checkbox.
+   *
+   * If the checkbox is checked, it sets the `selectedUsers` state to an array of
+   * all user emails. If the checkbox is unchecked, it sets the `selectedUsers`
+   * state to an empty array.
+   *
+   * @param {boolean | 'indeterminate'} checked The state of the checkbox.
+   */
+  const handleSelectAll = (checked: boolean | 'indeterminate') => {
+    if (checked === true) {
+      setSelectedUsers(USERS.map((user) => user.email));
+    } else {
+      setSelectedUsers([]);
     }
-const isAllSelected = selectedUsers.length === USERS.length;
+  };
+
+  
+  /**
+   * Handles the selection of individual users.
+   *
+   * If the item is already selected, it removes the item from the
+   * `selectedUsers` array. If the item is not selected, it adds the item
+   * to the `selectedUsers` array.
+   *
+   * @param {string} item The email of the user that was selected or deselected.
+   */
+  const handleItemChange = (item: string) => {
+    setSelectedUsers((prevSelectedUsers) => {
+      if (prevSelectedUsers.includes(item)) {
+        return prevSelectedUsers.filter((user) => user !== item);
+      } else {
+        return [...prevSelectedUsers, item];
+      }
+    })
+  }
+  const isAllSelected = selectedUsers.length === USERS.length;
+
 
   const DATA_USERS = USERS.map((user) => {
     return {
-      checkbox: <CustomCheckbox 
-        checked={selectedUsers.includes(user.email)} 
-        onCheckedChange={() => handleItemChange(user.email)} 
+      checkbox: <CustomCheckbox
+        checked={selectedUsers.includes(user.email)}
+        onCheckedChange={() => handleItemChange(user.email)}
       />,
       name: user.name,
       email: user.email,
@@ -45,7 +110,7 @@ const isAllSelected = selectedUsers.length === USERS.length;
           {user.role}
         </td>
       ),
-      status:(
+      status: (
         <td className={` w-[50px] text-center text-[12px] rounded-[8px] ${getActiveClass(user.status)}`}>
           {user.status}
         </td>
@@ -53,9 +118,9 @@ const isAllSelected = selectedUsers.length === USERS.length;
       created: user.created,
       lastLogin: user.lastLogin,
       action: (
-        <div className="flex gap-2 px-0 align-center">
-          <EditModal dataDialog = {<UserProfileDialog />} />
-          <Image src={Delete} width={24} height={24} alt="delete"/>
+        <div className="flex gap-1 px-0 align-center">
+          <EditModal dataDialog={<UserProfileDialog handleClose={handleCloseEdit} />} open={openEdit} handleOpen={handleOpenEdit} />
+          <DeleteUserModal onConfirm={handleCloseDelete} open={openDelete} handleOpen={handleOpenDelete} handleClose={handleCloseDelete} />
         </div>
       ),
     };
@@ -64,14 +129,21 @@ const isAllSelected = selectedUsers.length === USERS.length;
     <main className="p-">
       <div>
         Hello User
-        <Table header={HEADER_FIELD} data={DATA_USERS} 
-        checked={isAllSelected} 
-        handleAllItemSelect={handleSelectAll} />
+        <Table header={HEADER_FIELD} data={DATA_USERS}
+          checked={isAllSelected}
+          handleAllItemSelect={handleSelectAll} />
       </div>
     </main>
   );
 }
 
+  /**
+   * Given a role, return a string containing the class names
+   * that will give the appropriate background and text color.
+   *
+   * @param {string} role The role of the user.
+   * @returns {string} A string containing the class names.
+   */
 function getRoleClass(role: string) {
   switch (role) {
     case "student":
@@ -85,10 +157,18 @@ function getRoleClass(role: string) {
   }
 }
 
+  /**
+   * Given a role, return a string containing the class names
+   * that will give the appropriate background and text color
+   * for the active status.
+   *
+   * @param {string} role The status of the user.
+   * @returns {string} A string containing the class names.
+   */
 function getActiveClass(role: string) {
   switch (role) {
     case "active":
-      return "bg-green-100 text-green-800"; 
+      return "bg-green-100 text-green-800";
     default:
       return "bg-gray-100 text-gray-800";
   }
