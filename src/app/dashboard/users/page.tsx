@@ -8,6 +8,9 @@ import CustomCheckbox from "@/components/checkbox";
 import { EditModal } from "@/components/editDialog";
 import UserProfileDialog from "@/components/userProfileDialog";
 import DeleteUserModal from "@/components/deleteUserModal";
+import { User } from "./type";
+import { Select } from "@radix-ui/themes";
+import AddUserModal from "@/components/addUserModal";
 
 /**
  * A dashboard page for users.
@@ -25,39 +28,47 @@ export default function Users() {
   const [openEdit, setOpenEdit] = useState(false);
   // State to manage the open state of delete
   const [openDelete, setOpenDelete] = useState(false);
-
-/**
- * Opens the edit modal by setting the `openEdit` state to true.
- */
-  function handleOpenEdit() {
+  // State to manage the open state of add user
+  const [openAddUser, setOpenAddUser] = useState(false);
+  //  State to manage the selected user
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  /**
+   * Opens the edit modal by setting the `openEdit` state to true.
+   */
+  function handleOpenEdit(user: User) {
+      setSelectedUser(user);
     setOpenEdit(true)
   }
+  function handleOpenAdd() {
+    setOpenAddUser(true)
+  }
 
-/**
- * Opens the delete modal by setting the `openDelete` state to true and logs the state of the modal.
- */
+  /**
+   * Opens the delete modal by setting the `openDelete` state to true and logs the state of the modal.
+   */
   function handleOpenDelete() {
     setOpenDelete(true)
     console.log("Open delete modal", openDelete);
   }
-  
-/**
- * Closes the edit modal by setting the `openEdit` state to false.
- */
+
+  /**
+   * Closes the edit modal by setting the `openEdit` state to false.
+   */
 
   function handleCloseEdit() {
     setOpenEdit(false)
   }
-
-  
-/**
- * Closes the delete modal by setting the `openDelete` state to false and logs the state of the modal.
- */
+  /**
+   * Closes the delete modal by setting the `openDelete` state to false and logs the state of the modal.
+   */
   function handleCloseDelete() {
     setOpenDelete(false)
   }
+  function handleCloseAdd() {
+    setOpenAddUser(false)
+  }
 
-  
+
   /**
    * Handles the select all checkbox.
    *
@@ -75,7 +86,6 @@ export default function Users() {
     }
   };
 
-  
   /**
    * Handles the selection of individual users.
    *
@@ -106,20 +116,20 @@ export default function Users() {
       name: user.name,
       email: user.email,
       role: (
-        <td className={` w-[50px] text-center text-[12px] rounded-[8px] ${getRoleClass(user.role)}`}>
+        <div className={` w-[50px] text-center text-[12px] rounded-[8px] ${getRoleClass(user.role)}`}>
           {user.role}
-        </td>
+        </div>
       ),
       status: (
-        <td className={` w-[50px] text-center text-[12px] rounded-[8px] ${getActiveClass(user.status)}`}>
+        <div className={` w-[50px] text-center text-[12px] rounded-[8px] ${getActiveClass(user.status)}`}>
           {user.status}
-        </td>
+        </div>
       ),
-      created: user.created,
+      createdAt: user.createdAt,
       lastLogin: user.lastLogin,
       action: (
         <div className="flex gap-1 px-0 align-center">
-          <EditModal dataDialog={<UserProfileDialog handleClose={handleCloseEdit} />} open={openEdit} handleOpen={handleOpenEdit} />
+          <EditModal dataDialog={selectedUser && <UserProfileDialog handleClose={handleCloseEdit} mode="edit" defaultValues={selectedUser} />} open={openEdit} handleOpen={() => handleOpenEdit(user)} />
           <DeleteUserModal onConfirm={handleCloseDelete} open={openDelete} handleOpen={handleOpenDelete} handleClose={handleCloseDelete} />
         </div>
       ),
@@ -133,17 +143,20 @@ export default function Users() {
           checked={isAllSelected}
           handleAllItemSelect={handleSelectAll} />
       </div>
+
+      <div>
+          <AddUserModal dataDialog={<UserProfileDialog handleClose={handleCloseAdd} mode="add"/>} open={openAddUser} handleOpen={() => handleOpenAdd()} />
+      </div>
     </main>
   );
 }
-
-  /**
-   * Given a role, return a string containing the class names
-   * that will give the appropriate background and text color.
-   *
-   * @param {string} role The role of the user.
-   * @returns {string} A string containing the class names.
-   */
+/**
+ * Given a role, return a string containing the class names
+ * that will give the appropriate background and text color.
+ *
+ * @param {string} role The role of the user.
+ * @returns {string} A string containing the class names.
+ */
 function getRoleClass(role: string) {
   switch (role) {
     case "student":
@@ -157,14 +170,14 @@ function getRoleClass(role: string) {
   }
 }
 
-  /**
-   * Given a role, return a string containing the class names
-   * that will give the appropriate background and text color
-   * for the active status.
-   *
-   * @param {string} role The status of the user.
-   * @returns {string} A string containing the class names.
-   */
+/**
+ * Given a role, return a string containing the class names
+ * that will give the appropriate background and text color
+ * for the active status.
+ *
+ * @param {string} role The status of the user.
+ * @returns {string} A string containing the class names.
+ */
 function getActiveClass(role: string) {
   switch (role) {
     case "active":

@@ -1,11 +1,10 @@
 export type User = {
-  id: number
   name: string
   email: string
-  role: React.ReactNode
-  status: React.ReactNode
-  created: string
+  role: string
+  status: string
+  createdAt: string
   lastLogin: string
-  action: React.ReactNode
+  action?: string
 
 }
