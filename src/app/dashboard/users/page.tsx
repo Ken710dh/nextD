@@ -36,7 +36,7 @@ export default function Users() {
    * Opens the edit modal by setting the `openEdit` state to true.
    */
   function handleOpenEdit(user: User) {
-      setSelectedUser(user);
+    setSelectedUser(user);
     setOpenEdit(true)
   }
   function handleOpenAdd() {
@@ -136,18 +136,24 @@ export default function Users() {
     };
   });
   return (
-    <main className="p-">
-      <div>
-        Hello User
-        <Table header={HEADER_FIELD} data={DATA_USERS}
-          checked={isAllSelected}
-          handleAllItemSelect={handleSelectAll} />
-      </div>
+    <main className="p-4 flex flex-col gap-4">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="inline text-xl font-semibold">Hello User</h1>
 
-      <div>
-          <AddUserModal dataDialog={<UserProfileDialog handleClose={handleCloseAdd} mode="add"/>} open={openAddUser} handleOpen={() => handleOpenAdd()} />
+        <AddUserModal
+          dataDialog={<UserProfileDialog handleClose={handleCloseAdd} mode="add" />}
+          open={openAddUser}
+          handleOpen={handleOpenAdd}
+        />
       </div>
+        <Table
+          header={HEADER_FIELD}
+          data={DATA_USERS}
+          checked={isAllSelected}
+          handleAllItemSelect={handleSelectAll}
+        />
     </main>
+
   );
 }
 /**

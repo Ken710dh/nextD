@@ -1,7 +1,7 @@
 .container {
-  max-width: 'calc(100vw - 248px)';
-    border-collapse: separate; 
-    border-spacing: 0;
+  max-width: 80vw;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 .tableHeader{
   background-color: var(--background-color-1);

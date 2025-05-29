@@ -1,9 +1,11 @@
 "use client"
 import { Button } from "@radix-ui/themes";
-import React, { useEffect } from "react";
-import { UserProfile, UserProfileDialogProps } from "./type";
+import React, { useEffect, useRef } from "react";
+import { UserProfileDialogProps, UserProfileForm } from "./type";
 import SelectItem from "../selectItem";
-import { log } from "node:console";
+import { userSchema } from "./schema";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 /**
  * A dialog component to display user profile information.
  *
@@ -19,92 +21,152 @@ export default function UserProfileDialog({
   defaultValues
 }: UserProfileDialogProps) {
 
-  const ROLE_SELECT_OPTION = ['admin', 'teacher', 'student', 'parent'];
-  const STATUS_SELECT_OPTION = ['active', 'inactive'];
-
-  const [form, setForm] = React.useState<UserProfile>({
-    name: '',
-    email: '',
-    role: '',
-    status: '',
-    createdAt: '',
-    lastLogin: '',
-  });
-
-  useEffect(() => {
-    if (mode === 'edit' && defaultValues) {
-      setForm(defaultValues)
-    } else {
-      setForm({
+  const { handleSubmit, formState: { errors }, control, reset, register, watch } =
+    useForm<UserProfileForm>({
+      resolver: yupResolver(userSchema), mode: "onBlur", defaultValues: {
         name: '',
         email: '',
         role: '',
         status: '',
-        createdAt: '',
-        lastLogin: '',
-      })
+      },
+    });
+  const ROLE_SELECT_OPTION = ['admin', 'teacher', 'student', 'parent'];
+  const STATUS_SELECT_OPTION = ['active', 'inactive'];
+
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const role = watch('role');
+  const status = watch('status');
+
+  const handleCustomSubmit = () => {
+    formRef.current?.requestSubmit();
+  };
+
+  useEffect(() => {
+    if (mode === 'edit' && defaultValues) {
+      reset(defaultValues);
+    } else {
+      reset({
+        name: '',
+        email: '',
+        role: ROLE_SELECT_OPTION[0],
+        status: STATUS_SELECT_OPTION[0],
+      });
     }
   }, [mode, defaultValues]);
   const avatarUrl = 'https://cdn-icons-png.flaticon.com/512/40/40387.png';
-  const handleChange = (field: keyof UserProfile, value: string) => {
-    setForm((prev) => ({
-      ...prev,
-      [field]: value
-    }))
-  } 
-  
+
+  const onSubmit = (data: UserProfileForm) => {
+    console.log('SUBMITTED');
+    console.log(data);
+    handleClose();
+    reset();
+  }
+
   return (
     <>
-      <div className="w-full max-w-md mx-auto bg-white p-6 rounded-xl shadow space-y-6">
-        <div className="flex flex-col items-center text-center">
+      <div className="w-full bg-white p-6 rounded-xl shadow space-y-6">
+        <div className="flex flex-col">
           <img
             src={avatarUrl}
-            alt={form.name}
-            className="w-24 h-24 rounded-full border shadow"
+            alt={'avatar'}
+            className="w-24 h-24 rounded-full border shadow divide-y divide-gray-300"
           />
-          <input
-            value={form.name}
-            onChange={e => handleChange('name', e.target.value)}
-            placeholder="Name"
-            className="w-full p-2 border rounded"
-          />
-          <input
-            value={form.email}
-            onChange={e => handleChange('email', e.target.value)}
-            placeholder="Email"
-            className="w-full p-2 border rounded"
-          />
+          <form ref={formRef} onSubmit={handleSubmit(onSubmit)}>
+            <div className="flex flex-col gap-4 p-4 text-base">
+              <label htmlFor="name">Name</label>
+              <input
+                {...register('name')}
+                placeholder="Enter the name here"
+                className="w-1/2 p-2 rounded 
+                border border-gray-300 
+                focus:outline-none focus:border-gray-500
+              hover:border-gray-700 
+                transition-colors duration-200"
+              />
+              {errors.name && <small className="text-red-500 text-sm">{errors.name.message}</small>}
+              <label htmlFor="email">Email</label>
+              <input
+                {...register('email')}
+                placeholder="Enter a Email"
+                className="w-1/2 p-2 rounded 
+                border border-gray-300 
+                focus:outline-none focus:border-gray-500
+              hover:border-gray-700 
+                transition-colors duration-200"
+              />{errors.email && <small className="text-red-500 text-sm">{errors.email.message}</small>}
+            </div>
+          </form>
         </div>
 
         {mode === 'edit' ? (
-          form.role && form.status ? (
-            <div className="flex gap-4">
-              <SelectItem label="Role" defaultValue={form.role} selectOption={ROLE_SELECT_OPTION} onValueChange={(value) => handleChange('role', value)} />
-              <SelectItem label="Status" defaultValue={form.status} selectOption={STATUS_SELECT_OPTION}  onValueChange={(value) => handleChange('role', value)} />
+          role && status ? (
+            <div className="flex gap-4 p-4 text-base flex-row">
+              <Controller
+                control={control}
+                name="role"
+                render={({ field }) => (
+                  <SelectItem
+                    label="Role"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    selectOption={ROLE_SELECT_OPTION}
+                  />
+                )}
+              />
+              {errors.role && <p className="text-red-500 text-sm">{errors.role.message}</p>}
+              <Controller
+                control={control}
+                name="status"
+                render={({ field }) => (
+                  <SelectItem label="Status" value={field.value} selectOption={STATUS_SELECT_OPTION} onValueChange={field.onChange} />
+                )} />
+              <div className="text-xs text-zinc-500 space-y-1 flex flex-row gap-4">
+                <div><span className="font-medium">Last login:</span> {formatDate(defaultValues?.lastLogin ?? '')}</div>
+                <div><span className="font-medium">Created at:</span> {formatDate(defaultValues?.createdAt ?? '')}</div>
+              </div>
             </div>
           ) : null
         ) : (
-          <div className="flex gap-4">
-            <SelectItem
-              label="Role"
-              defaultValue={form.role && form.role !== '' ? form.role : ROLE_SELECT_OPTION[0]}
-              selectOption={ROLE_SELECT_OPTION} onValueChange={(value) => handleChange('role', value)} 
+          <div className="flex gap-4 p-4 text-base">
+            <Controller
+              control={control}
+              name="role"
+              render={({ field }) => (
+                <SelectItem
+                  label="Role"
+                  value={field.value}
+                  selectOption={ROLE_SELECT_OPTION} onValueChange={field.onChange}
+                />)}
             />
-            <SelectItem
-              label="Status"
-              defaultValue={form.status && form.status !== '' ? form.status : STATUS_SELECT_OPTION[0]}
-              selectOption={STATUS_SELECT_OPTION} onValueChange={(value) => handleChange('role', value)} 
-            />
+            <Controller
+              control={control}
+              name="status"
+              render={({ field }) => (
+                <SelectItem
+                  label="Status"
+                  value={field.value}
+                  selectOption={STATUS_SELECT_OPTION} onValueChange={field.onChange}
+                />
+              )} />
           </div>
         )}
 
-        <div className="text-xs text-zinc-500 space-y-1">
-          <div><span className="font-medium">Last login:</span> {formatDate(form.lastLogin)}</div>
-          <div><span className="font-medium">Created at:</span> {formatDate(form.createdAt)}</div>
+        <div className="flex gap-4 justify-end">
+          <button className=" px-4 py-2 rounded 
+            bg-gray-200 text-gray-800 
+            hover:bg-orange-200 
+            active:bg-orange-300 
+            cursor-pointer 
+            transition-colors duration-200" onClick={handleClose}>Cancel</button>
+          <button className="px-4 py-2 rounded 
+            bg-orange-400 text-white 
+            hover:bg-orange-300 
+            active:bg-orange-500 
+            cursor-pointer 
+            transition-colors duration-200" onClick={handleCustomSubmit}>{mode === 'edit' ? 'Update' : 'Create'}</button>
         </div>
-        <Button onClick={handleClose}>Cancel</Button>
       </div>
-
     </>
   );
 }

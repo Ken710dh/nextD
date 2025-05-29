@@ -38,7 +38,7 @@ export function EditModal({ dataDialog, open, handleOpen }: {
         <Dialog.Content
           style={{ maxWidth: '1000px', maxHeight: '90vh', width: '100%' }}
           className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-      bg-white dark:bg-zinc-600 rounded-[6px] border-[var(--border-color-1)] shadow-[0_2px_8px_rgba(0,0,0,0.05)] p-11 z-50"
+      bg-white rounded-[6px] p-11 z-50 border-[var(--border-color-1)]"
         >
           {dataDialog}
         </Dialog.Content>
