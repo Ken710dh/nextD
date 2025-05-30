@@ -24,9 +24,9 @@ export default function UserProfileDialog({
   const { handleSubmit, formState: { errors }, control, reset, register, watch } =
     useForm<UserProfileForm>({
       resolver: yupResolver(userSchema), mode: "onBlur", defaultValues: {
-        name: '',
+        fullname: '',
         email: '',
-        role: '',
+        roleuser: '',
         status: '',
       },
     });
@@ -35,7 +35,7 @@ export default function UserProfileDialog({
 
   const formRef = useRef<HTMLFormElement>(null);
 
-  const role = watch('role');
+  const role = watch('roleuser');
   const status = watch('status');
 
   const handleCustomSubmit = () => {
@@ -47,9 +47,9 @@ export default function UserProfileDialog({
       reset(defaultValues);
     } else {
       reset({
-        name: '',
+        fullname: '',
         email: '',
-        role: ROLE_SELECT_OPTION[0],
+        roleuser: ROLE_SELECT_OPTION[0],
         status: STATUS_SELECT_OPTION[0],
       });
     }
@@ -76,7 +76,7 @@ export default function UserProfileDialog({
             <div className="flex flex-col gap-4 p-4 text-base">
               <label htmlFor="name">Name</label>
               <input
-                {...register('name')}
+                {...register('fullname')}
                 placeholder="Enter the name here"
                 className="w-1/2 p-2 rounded 
                 border border-gray-300 
@@ -84,7 +84,7 @@ export default function UserProfileDialog({
               hover:border-gray-700 
                 transition-colors duration-200"
               />
-              {errors.name && <small className="text-red-500 text-sm">{errors.name.message}</small>}
+              {errors.fullname && <small className="text-red-500 text-sm">{errors.fullname.message}</small>}
               <label htmlFor="email">Email</label>
               <input
                 {...register('email')}
@@ -104,7 +104,7 @@ export default function UserProfileDialog({
             <div className="flex gap-4 p-4 text-base flex-row">
               <Controller
                 control={control}
-                name="role"
+                name="roleuser"
                 render={({ field }) => (
                   <SelectItem
                     label="Role"
@@ -114,7 +114,7 @@ export default function UserProfileDialog({
                   />
                 )}
               />
-              {errors.role && <p className="text-red-500 text-sm">{errors.role.message}</p>}
+              {errors.roleuser && <p className="text-red-500 text-sm">{errors.roleuser.message}</p>}
               <Controller
                 control={control}
                 name="status"
@@ -122,8 +122,8 @@ export default function UserProfileDialog({
                   <SelectItem label="Status" value={field.value} selectOption={STATUS_SELECT_OPTION} onValueChange={field.onChange} />
                 )} />
               <div className="text-xs text-zinc-500 space-y-1 flex flex-row gap-4">
-                <div><span className="font-medium">Last login:</span> {formatDate(defaultValues?.lastLogin ?? '')}</div>
-                <div><span className="font-medium">Created at:</span> {formatDate(defaultValues?.createdAt ?? '')}</div>
+                <div><span className="font-medium">Last login:</span> {formatDateSimple(defaultValues?.lastLogin ?? '')}</div>
+                <div><span className="font-medium">Created at:</span> {formatDateSimple(defaultValues?.createAt ?? '')}</div>
               </div>
             </div>
           ) : null
@@ -131,7 +131,7 @@ export default function UserProfileDialog({
           <div className="flex gap-4 p-4 text-base">
             <Controller
               control={control}
-              name="role"
+              name="roleuser"
               render={({ field }) => (
                 <SelectItem
                   label="Role"
@@ -172,12 +172,16 @@ export default function UserProfileDialog({
 }
 
 
-function formatDate(dateString: string) {
-  const parsedDate = new Date(Date.parse(dateString));
+function formatDateSimple(dateString: string): string {
+  const parsedDate = new Date(dateString);
   if (isNaN(parsedDate.getTime())) return 'Invalid date';
 
-  return new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(parsedDate);
+  const day = String(parsedDate.getDate()).padStart(2, '0');
+  const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+  const year = parsedDate.getFullYear();
+
+  const hour = String(parsedDate.getHours()).padStart(2, '0');
+  const minute = String(parsedDate.getMinutes()).padStart(2, '0');
+
+  return `${day}/${month}/${year}, ${hour}:${minute}`;
 }

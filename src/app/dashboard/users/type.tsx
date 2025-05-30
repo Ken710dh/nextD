@@ -1,9 +1,9 @@
 export type User = {
-  name: string
+  fullname: string
   email: string
-  role: string
+  roleuser: string
   status: string
-  createdAt: string
+  createAt: string
   lastLogin: string
   action?: string
 

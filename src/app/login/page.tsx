@@ -76,7 +76,7 @@ export default function LoginForm() {
           </Button>
         </form>
         <Text className={styles.footerText}>
-          Don't have an account?
+          Do not have an account?
           <Link href="/signup" className={styles.link}>Sign up</Link>
         </Text>
       </div>

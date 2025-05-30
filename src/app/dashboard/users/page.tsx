@@ -9,8 +9,10 @@ import { EditModal } from "@/components/editDialog";
 import UserProfileDialog from "@/components/userProfileDialog";
 import DeleteUserModal from "@/components/deleteUserModal";
 import { User } from "./type";
-import { Select } from "@radix-ui/themes";
+import client from '@/lib/apolo/client'
 import AddUserModal from "@/components/addUserModal";
+import { useQuery } from "@apollo/client";
+import { GET_USERS } from "./apolo";
 
 /**
  * A dashboard page for users.
@@ -32,6 +34,10 @@ export default function Users() {
   const [openAddUser, setOpenAddUser] = useState(false);
   //  State to manage the selected user
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+
+  const {loading, error, data} = useQuery(GET_USERS, {client});
+  console.log("fetch", data)
   /**
    * Opens the edit modal by setting the `openEdit` state to true.
    */
@@ -107,17 +113,20 @@ export default function Users() {
   const isAllSelected = selectedUsers.length === USERS.length;
 
 
-  const DATA_USERS = USERS.map((user) => {
+if (loading) return <p>Loading...</p>;
+if (error) return <p>Error: {error.message}</p>;
+
+  const DATA_USERS = data?.allUsers?.nodes?.map((user: User) => {
     return {
       checkbox: <CustomCheckbox
         checked={selectedUsers.includes(user.email)}
         onCheckedChange={() => handleItemChange(user.email)}
       />,
-      name: user.name,
+      name: user.fullname,
       email: user.email,
       role: (
-        <div className={` w-[50px] text-center text-[12px] rounded-[8px] ${getRoleClass(user.role)}`}>
-          {user.role}
+        <div className={` w-[50px] text-center text-[12px] rounded-[8px] ${getRoleClass(user.roleuser)}`}>
+          {user.roleuser}
         </div>
       ),
       status: (
@@ -125,8 +134,8 @@ export default function Users() {
           {user.status}
         </div>
       ),
-      createdAt: user.createdAt,
-      lastLogin: user.lastLogin,
+      createdAt: formatDateSimple(user.createAt),
+      lastLogin: formatDateSimple(user.lastLogin),
       action: (
         <div className="flex gap-1 px-0 align-center">
           <EditModal dataDialog={selectedUser && <UserProfileDialog handleClose={handleCloseEdit} mode="edit" defaultValues={selectedUser} />} open={openEdit} handleOpen={() => handleOpenEdit(user)} />
@@ -191,4 +200,18 @@ function getActiveClass(role: string) {
     default:
       return "bg-gray-100 text-gray-800";
   }
+}
+
+function formatDateSimple(dateString: string): string {
+  const parsedDate = new Date(dateString);
+  if (isNaN(parsedDate.getTime())) return 'Invalid date';
+
+  const day = String(parsedDate.getDate()).padStart(2, '0');
+  const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+  const year = parsedDate.getFullYear();
+
+  const hour = String(parsedDate.getHours()).padStart(2, '0');
+  const minute = String(parsedDate.getMinutes()).padStart(2, '0');
+
+  return `${day}/${month}/${year}, ${hour}:${minute}`;
 }

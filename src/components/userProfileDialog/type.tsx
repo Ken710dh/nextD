@@ -1,11 +1,11 @@
 
 export type UserProfile = {
-  name: string,
+  fullname: string,
   email: string,
-  role: string,
+  roleuser: string,
   status: string,
   lastLogin: string, 
-  createdAt: string,
+  createAt: string,
 }
 
 export type UserProfileDialogProps = {
@@ -15,8 +15,8 @@ export type UserProfileDialogProps = {
 }
 
 export type UserProfileForm = {
-  name: string,
+  fullname: string,
   email: string,
-  role: string,
+  roleuser: string,
   status: string,
 }
