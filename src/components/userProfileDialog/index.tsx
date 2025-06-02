@@ -1,11 +1,12 @@
-"use client"
-import { Button } from "@radix-ui/themes";
+'use client'
 import React, { useEffect, useRef } from "react";
 import { UserProfileDialogProps, UserProfileForm } from "./type";
 import SelectItem from "../selectItem";
 import { userSchema } from "./schema";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation } from "@apollo/client";
+import { CREATE_USER } from "./apoloclient";
 /**
  * A dialog component to display user profile information.
  *
@@ -21,6 +22,11 @@ export default function UserProfileDialog({
   defaultValues
 }: UserProfileDialogProps) {
 
+    const [createUser] = useMutation(CREATE_USER, {
+      refetchQueries: ['GET_USERS'],
+      awaitRefetchQueries: true
+    });
+
   const { handleSubmit, formState: { errors }, control, reset, register, watch } =
     useForm<UserProfileForm>({
       resolver: yupResolver(userSchema), mode: "onBlur", defaultValues: {
@@ -28,6 +34,8 @@ export default function UserProfileDialog({
         email: '',
         roleuser: '',
         status: '',
+        password: '',
+        confirmpassword: '',
       },
     });
   const ROLE_SELECT_OPTION = ['admin', 'teacher', 'student', 'parent'];
@@ -38,8 +46,9 @@ export default function UserProfileDialog({
   const role = watch('roleuser');
   const status = watch('status');
 
-  const handleCustomSubmit = () => {
+  const handleCustomSubmit = async () => {
     formRef.current?.requestSubmit();
+    handleClose();
   };
 
   useEffect(() => {
@@ -51,14 +60,24 @@ export default function UserProfileDialog({
         email: '',
         roleuser: ROLE_SELECT_OPTION[0],
         status: STATUS_SELECT_OPTION[0],
+        password: '',
+        confirmpassword: '',
       });
     }
   }, [mode, defaultValues]);
   const avatarUrl = 'https://cdn-icons-png.flaticon.com/512/40/40387.png';
 
-  const onSubmit = (data: UserProfileForm) => {
+  const onSubmit = async (data: UserProfileForm) => {
+    const {confirmpassword, ...userData} = data;
+    await createUser({
+      variables: {
+        input: {
+          user: userData
+        }
+      }
+    });
     console.log('SUBMITTED');
-    console.log(data);
+    console.log(userData);
     handleClose();
     reset();
   }
@@ -95,6 +114,26 @@ export default function UserProfileDialog({
               hover:border-gray-700 
                 transition-colors duration-200"
               />{errors.email && <small className="text-red-500 text-sm">{errors.email.message}</small>}
+              <label htmlFor="password">Password</label>
+              <input
+                {...register('password')}
+                placeholder="Enter a password"
+                className="w-1/2 p-2 rounded 
+                border border-gray-300 
+                focus:outline-none focus:border-gray-500
+              hover:border-gray-700 
+                transition-colors duration-200"
+              />{errors.password && <small className="text-red-500 text-sm">{errors.password.message}</small>}
+              <label htmlFor="password">Confirm Password</label>
+              <input
+                {...register('confirmpassword')}
+                placeholder="Enter a confirm password"
+                className="w-1/2 p-2 rounded 
+                border border-gray-300 
+                focus:outline-none focus:border-gray-500
+              hover:border-gray-700 
+                transition-colors duration-200"
+              />{errors.confirmpassword && <small className="text-red-500 text-sm">{errors.confirmpassword.message}</small>}
             </div>
           </form>
         </div>

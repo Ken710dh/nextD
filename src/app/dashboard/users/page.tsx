@@ -86,7 +86,7 @@ export default function Users() {
    */
   const handleSelectAll = (checked: boolean | 'indeterminate') => {
     if (checked === true) {
-      setSelectedUsers(USERS.map((user) => user.email));
+      setSelectedUsers(DATA_USERS.map((user: User) => user.email));
     } else {
       setSelectedUsers([]);
     }
@@ -110,7 +110,6 @@ export default function Users() {
       }
     })
   }
-  const isAllSelected = selectedUsers.length === USERS.length;
 
 
 if (loading) return <p>Loading...</p>;
@@ -158,7 +157,7 @@ if (error) return <p>Error: {error.message}</p>;
         <Table
           header={HEADER_FIELD}
           data={DATA_USERS}
-          checked={isAllSelected}
+          checked={selectedUsers.length === DATA_USERS.length}
           handleAllItemSelect={handleSelectAll}
         />
     </main>
