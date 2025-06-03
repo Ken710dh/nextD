@@ -1,4 +1,5 @@
 export type User = {
+  id: number
   fullname: string
   email: string
   roleuser: string
@@ -6,5 +7,5 @@ export type User = {
   createAt: string
   lastLogin: string
   action?: string
-
+  password: string
 }

@@ -6,12 +6,15 @@ export type UserProfile = {
   status: string,
   lastLogin: string, 
   createAt: string,
+  password: string
+  
 }
 
 export type UserProfileDialogProps = {
   mode: 'add' | 'edit';
   defaultValues?: UserProfile
   handleClose: () => void
+  onRefetchUser?: () => void
 }
 
 export type UserProfileForm = {

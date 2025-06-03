@@ -11,8 +11,20 @@ export const GET_USERS = gql`
         email
         roleuser
         lastLogin
+        password
         status
         createAt
+      }
+    }
+  }
+`;
+
+export const DELETE_SELECTED_USER = gql`
+  mutation DeleteUserById($input: DeleteUserByIdInput!) {
+    deleteUserById(input: $input) {
+      deletedUserId
+      user {
+        id
       }
     }
   }

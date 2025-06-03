@@ -2,17 +2,16 @@
 
 import { useState } from "react";
 import { HEADER_FIELD } from "./constants";
-import { USERS } from "./dummyUser";
 import Table from "@/components/table";
 import CustomCheckbox from "@/components/checkbox";
 import { EditModal } from "@/components/editDialog";
 import UserProfileDialog from "@/components/userProfileDialog";
-import DeleteUserModal from "@/components/deleteUserModal";
 import { User } from "./type";
-import client from '@/lib/apolo/client'
 import AddUserModal from "@/components/addUserModal";
-import { useQuery } from "@apollo/client";
-import { GET_USERS } from "./apolo";
+import { useMutation, useQuery } from "@apollo/client";
+import { DELETE_SELECTED_USER, GET_USERS } from "./apolo";
+import DeleteModal from "@/components/deleteModal";
+import DeleteUserDialog from "@/components/deleteUserDialog";
 
 /**
  * A dashboard page for users.
@@ -34,10 +33,17 @@ export default function Users() {
   const [openAddUser, setOpenAddUser] = useState(false);
   //  State to manage the selected user
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  //  State to manage the selected delete user
+  const [selectedDeleteUser, setSelectedDeleteUser] = useState<User | null>(null);
 
-
-  const {loading, error, data} = useQuery(GET_USERS, {client});
-  console.log("fetch", data)
+  const { loading, error, data, refetch } = useQuery(GET_USERS);
+  const [deleteUserById] = useMutation(DELETE_SELECTED_USER, {
+        refetchQueries: [
+          GET_USERS,
+          'GetUsers',
+        ],
+  }
+  );
   /**
    * Opens the edit modal by setting the `openEdit` state to true.
    */
@@ -52,9 +58,11 @@ export default function Users() {
   /**
    * Opens the delete modal by setting the `openDelete` state to true and logs the state of the modal.
    */
-  function handleOpenDelete() {
+  function handleOpenDelete(user: User) {
+    setSelectedDeleteUser(user)
     setOpenDelete(true)
-    console.log("Open delete modal", openDelete);
+    console.log("Open delete modal to delete");
+
   }
 
   /**
@@ -111,10 +119,23 @@ export default function Users() {
     })
   }
 
+const handleDeleteUser = async () => {
+  if (!selectedDeleteUser?.id) return;
 
-if (loading) return <p>Loading...</p>;
-if (error) return <p>Error: {error.message}</p>;
+  await deleteUserById({
+    variables: {
+      input: {
+        id: selectedDeleteUser.id
+      }
+    },
+  });
+  setOpenDelete(false);
+  setSelectedDeleteUser(null);
+};
 
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+  console.log(data?.allUsers?.nodes);
   const DATA_USERS = data?.allUsers?.nodes?.map((user: User) => {
     return {
       checkbox: <CustomCheckbox
@@ -123,6 +144,7 @@ if (error) return <p>Error: {error.message}</p>;
       />,
       name: user.fullname,
       email: user.email,
+      password: user.password,
       role: (
         <div className={` w-[50px] text-center text-[12px] rounded-[8px] ${getRoleClass(user.roleuser)}`}>
           {user.roleuser}
@@ -137,8 +159,16 @@ if (error) return <p>Error: {error.message}</p>;
       lastLogin: formatDateSimple(user.lastLogin),
       action: (
         <div className="flex gap-1 px-0 align-center">
-          <EditModal dataDialog={selectedUser && <UserProfileDialog handleClose={handleCloseEdit} mode="edit" defaultValues={selectedUser} />} open={openEdit} handleOpen={() => handleOpenEdit(user)} />
-          <DeleteUserModal onConfirm={handleCloseDelete} open={openDelete} handleOpen={handleOpenDelete} handleClose={handleCloseDelete} />
+          <EditModal dataDialog={selectedUser &&
+            <UserProfileDialog handleClose={handleCloseEdit}
+              mode="edit" defaultValues={selectedUser} />}
+            open={openEdit} handleOpen={() => handleOpenEdit(user)} />
+
+          <DeleteModal deleteUserDialog={selectedDeleteUser &&
+            <DeleteUserDialog handleClose={handleCloseDelete}
+              onConfirm={handleDeleteUser}
+              userSelectedToDelete={selectedDeleteUser} />}
+              open={openDelete} handleOpen={() => handleOpenDelete(user)} />
         </div>
       ),
     };
@@ -149,17 +179,17 @@ if (error) return <p>Error: {error.message}</p>;
         <h1 className="inline text-xl font-semibold">Hello User</h1>
 
         <AddUserModal
-          dataDialog={<UserProfileDialog handleClose={handleCloseAdd} mode="add" />}
+          dataDialog={<UserProfileDialog handleClose={handleCloseAdd} mode="add" onRefetchUser={refetch} />}
           open={openAddUser}
           handleOpen={handleOpenAdd}
         />
       </div>
-        <Table
-          header={HEADER_FIELD}
-          data={DATA_USERS}
-          checked={selectedUsers.length === DATA_USERS.length}
-          handleAllItemSelect={handleSelectAll}
-        />
+      <Table
+        header={HEADER_FIELD}
+        data={DATA_USERS}
+        checked={selectedUsers.length === DATA_USERS.length}
+        handleAllItemSelect={handleSelectAll}
+      />
     </main>
 
   );
@@ -214,3 +244,4 @@ function formatDateSimple(dateString: string): string {
 
   return `${day}/${month}/${year}, ${hour}:${minute}`;
 }
+

@@ -6,7 +6,9 @@ import { userSchema } from "./schema";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation } from "@apollo/client";
-import { CREATE_USER } from "./apoloclient";
+import { CREATE_USER, UPDATE_USER_BY_EMAIL } from "./apoloclient";
+import { omit } from "lodash";
+import { GET_USERS } from "@/app/dashboard/users/apolo";
 /**
  * A dialog component to display user profile information.
  *
@@ -19,13 +21,19 @@ import { CREATE_USER } from "./apoloclient";
 export default function UserProfileDialog({
   mode,
   handleClose,
-  defaultValues
+  defaultValues,
+  onRefetchUser
 }: UserProfileDialogProps) {
 
-    const [createUser] = useMutation(CREATE_USER, {
-      refetchQueries: ['GET_USERS'],
-      awaitRefetchQueries: true
-    });
+  const [createUser] = useMutation(CREATE_USER, {
+  });
+  const [updateUserByEmail] = useMutation(UPDATE_USER_BY_EMAIL, {
+    refetchQueries: [
+      GET_USERS,
+      'GetUsers',
+    ],
+
+  });
 
   const { handleSubmit, formState: { errors }, control, reset, register, watch } =
     useForm<UserProfileForm>({
@@ -48,12 +56,14 @@ export default function UserProfileDialog({
 
   const handleCustomSubmit = async () => {
     formRef.current?.requestSubmit();
-    handleClose();
   };
 
   useEffect(() => {
     if (mode === 'edit' && defaultValues) {
-      reset(defaultValues);
+      reset({
+        ...defaultValues,
+        confirmpassword: defaultValues.password || '',
+      });
     } else {
       reset({
         fullname: '',
@@ -68,79 +78,84 @@ export default function UserProfileDialog({
   const avatarUrl = 'https://cdn-icons-png.flaticon.com/512/40/40387.png';
 
   const onSubmit = async (data: UserProfileForm) => {
-    const {confirmpassword, ...userData} = data;
-    await createUser({
-      variables: {
-        input: {
-          user: userData
-        }
+    try {
+      if (mode === 'add') {
+        const addUserData = omit(data, ['confirmpassword', '__typename', 'createAt', 'lastLogin']);
+        await createUser({
+          variables: {
+            input: {
+              user: addUserData
+            }
+          },
+        });
+      } else if (mode === 'edit') {
+        console.log("data", data);
+        const fieldsToRemove = ['confirmpassword', 'lastLogin', 'createAt', 'id', 'email', '__typename'];
+        const userPatch = omit(data, fieldsToRemove);
+        console.log("edited data", userPatch);
+        await updateUserByEmail({
+          variables: { input: { email: data.email, userPatch } },
+        });
       }
-    });
+      onRefetchUser && onRefetchUser();
+    } catch (error) {
+      console.log(error);
+    }
     console.log('SUBMITTED');
-    console.log(userData);
     handleClose();
     reset();
   }
 
+
   return (
     <>
-      <div className="w-full bg-white p-6 rounded-xl shadow space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="grid grid-cols-2 gap-4 p-4 text-base">
         <div className="flex flex-col">
-          <img
-            src={avatarUrl}
-            alt={'avatar'}
-            className="w-24 h-24 rounded-full border shadow divide-y divide-gray-300"
+          <label htmlFor="fullname">Name</label>
+          <input
+            {...register('fullname')}
+            placeholder="Enter the name here"
+            className="p-2 rounded border border-gray-300 focus:outline-none focus:border-gray-500 hover:border-gray-700 transition-colors duration-200"
           />
-          <form ref={formRef} onSubmit={handleSubmit(onSubmit)}>
-            <div className="flex flex-col gap-4 p-4 text-base">
-              <label htmlFor="name">Name</label>
-              <input
-                {...register('fullname')}
-                placeholder="Enter the name here"
-                className="w-1/2 p-2 rounded 
-                border border-gray-300 
-                focus:outline-none focus:border-gray-500
-              hover:border-gray-700 
-                transition-colors duration-200"
-              />
-              {errors.fullname && <small className="text-red-500 text-sm">{errors.fullname.message}</small>}
-              <label htmlFor="email">Email</label>
-              <input
-                {...register('email')}
-                placeholder="Enter a Email"
-                className="w-1/2 p-2 rounded 
-                border border-gray-300 
-                focus:outline-none focus:border-gray-500
-              hover:border-gray-700 
-                transition-colors duration-200"
-              />{errors.email && <small className="text-red-500 text-sm">{errors.email.message}</small>}
-              <label htmlFor="password">Password</label>
-              <input
-                {...register('password')}
-                placeholder="Enter a password"
-                className="w-1/2 p-2 rounded 
-                border border-gray-300 
-                focus:outline-none focus:border-gray-500
-              hover:border-gray-700 
-                transition-colors duration-200"
-              />{errors.password && <small className="text-red-500 text-sm">{errors.password.message}</small>}
-              <label htmlFor="password">Confirm Password</label>
-              <input
-                {...register('confirmpassword')}
-                placeholder="Enter a confirm password"
-                className="w-1/2 p-2 rounded 
-                border border-gray-300 
-                focus:outline-none focus:border-gray-500
-              hover:border-gray-700 
-                transition-colors duration-200"
-              />{errors.confirmpassword && <small className="text-red-500 text-sm">{errors.confirmpassword.message}</small>}
-            </div>
-          </form>
+          {errors.fullname && <small className="text-red-500 text-sm">{errors.fullname.message}</small>}
         </div>
 
-        {mode === 'edit' ? (
-          role && status ? (
-            <div className="flex gap-4 p-4 text-base flex-row">
+        <div className="flex flex-col">
+          <label htmlFor="email">Email</label>
+          <input
+            {...register('email')}
+            placeholder="Enter an email"
+            className="p-2 rounded border border-gray-300 focus:outline-none focus:border-gray-500 hover:border-gray-700 transition-colors duration-200"
+          />
+          {errors.email && <small className="text-red-500 text-sm">{errors.email.message}</small>}
+        </div>
+
+        <div className="flex flex-col">
+          <label htmlFor="password">Password</label>
+          <input
+            {...register('password')}
+            placeholder="Enter a password"
+            className="p-2 rounded border border-gray-300 focus:outline-none focus:border-gray-500 hover:border-gray-700 transition-colors duration-200"
+          />
+          {errors.password && <small className="text-red-500 text-sm">{errors.password.message}</small>}
+        </div>
+
+        <div className="flex flex-col">
+          <label htmlFor="confirmpassword">Confirm Password</label>
+          <input
+            {...register('confirmpassword')}
+            placeholder="Confirm password"
+            className="p-2 rounded border border-gray-300 focus:outline-none focus:border-gray-500 hover:border-gray-700 transition-colors duration-200"
+          />
+          {errors.confirmpassword && <small className="text-red-500 text-sm">{errors.confirmpassword.message}</small>}
+        </div>
+      </div>
+
+      {mode === 'edit' ? (
+        role && status ? (
+          <div className="flex gap-4 p-4 text-base flex-col">
+            <div className="flex flex-row  gap-4">
               <Controller
                 control={control}
                 name="roleuser"
@@ -160,52 +175,61 @@ export default function UserProfileDialog({
                 render={({ field }) => (
                   <SelectItem label="Status" value={field.value} selectOption={STATUS_SELECT_OPTION} onValueChange={field.onChange} />
                 )} />
-              <div className="text-xs text-zinc-500 space-y-1 flex flex-row gap-4">
-                <div><span className="font-medium">Last login:</span> {formatDateSimple(defaultValues?.lastLogin ?? '')}</div>
-                <div><span className="font-medium">Created at:</span> {formatDateSimple(defaultValues?.createAt ?? '')}</div>
+            </div>
+            <div className="flex flex-row gap-4 text-sm text-gray-500">
+              <div className="flex flex-col w-1/2">
+                <label className="font-medium">Last login:</label>
+                <span className="p-2 border border-gray-200 rounded bg-gray-50">{formatDateSimple(defaultValues?.lastLogin ?? '')}</span>
+              </div>
+              <div className="flex flex-col w-1/2">
+                <label className="font-medium">Created at:</label>
+                <span className="p-2 border border-gray-200 rounded bg-gray-50">{formatDateSimple(defaultValues?.createAt ?? '')}</span>
               </div>
             </div>
-          ) : null
-        ) : (
-          <div className="flex gap-4 p-4 text-base">
-            <Controller
-              control={control}
-              name="roleuser"
-              render={({ field }) => (
-                <SelectItem
-                  label="Role"
-                  value={field.value}
-                  selectOption={ROLE_SELECT_OPTION} onValueChange={field.onChange}
-                />)}
-            />
-            <Controller
-              control={control}
-              name="status"
-              render={({ field }) => (
-                <SelectItem
-                  label="Status"
-                  value={field.value}
-                  selectOption={STATUS_SELECT_OPTION} onValueChange={field.onChange}
-                />
-              )} />
-          </div>
-        )}
 
-        <div className="flex gap-4 justify-end">
-          <button className=" px-4 py-2 rounded 
+          </div>
+        ) : null
+      ) : (
+        <div className="flex gap-4 p-4 text-base">
+          <Controller
+            control={control}
+            name="roleuser"
+            render={({ field }) => (
+              <SelectItem
+                label="Role"
+                value={field.value}
+                selectOption={ROLE_SELECT_OPTION} onValueChange={field.onChange}
+              />)}
+          />
+          <Controller
+            control={control}
+            name="status"
+            render={({ field }) => (
+              <SelectItem
+                label="Status"
+                value={field.value}
+                selectOption={STATUS_SELECT_OPTION} onValueChange={field.onChange}
+              />
+            )} />
+        </div>
+      )}
+
+      <div className="flex gap-4 justify-end">
+        <button className=" px-4 py-2 rounded 
             bg-gray-200 text-gray-800 
             hover:bg-orange-200 
             active:bg-orange-300 
             cursor-pointer 
             transition-colors duration-200" onClick={handleClose}>Cancel</button>
-          <button className="px-4 py-2 rounded 
+        <button className="px-4 py-2 rounded 
             bg-orange-400 text-white 
             hover:bg-orange-300 
             active:bg-orange-500 
             cursor-pointer 
             transition-colors duration-200" onClick={handleCustomSubmit}>{mode === 'edit' ? 'Update' : 'Create'}</button>
-        </div>
       </div>
+
+      </form>
     </>
   );
 }
