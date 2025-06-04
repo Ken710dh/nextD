@@ -25,11 +25,11 @@ export default function DeleteModal({ open, handleOpen, deleteUserDialog
   return (
     <Dialog.Root open={open} onOpenChange={handleOpen}>
       <Dialog.Trigger>
-        <Image src={Delete} alt="" height={20} width={20}></Image>
+        <Image src={Delete} alt=""style={{height: '25px', width: '25px'}}/>
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/3 z-40" />
-        <Dialog.Content>
+        <Dialog.Content asChild>
           {deleteUserDialog}
         </Dialog.Content>
       </Dialog.Portal>

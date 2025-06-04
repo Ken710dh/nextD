@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Close from '@/assets/close-icon.svg'
 import { UserProfile } from "./type";
+import * as Dialog from '@radix-ui/react-dialog'
 /**
  * A dialog component to confirm the deletion of a user.
  *
@@ -25,9 +26,9 @@ export default function DeleteUserDialog({ userSelectedToDelete, handleClose, on
 
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-zinc-800 dark:text-zinc-100">
+          <Dialog.Title className="text-lg font-semibold text-zinc-800 dark:text-zinc-100">
             Confirm Delete {userSelectedToDelete.fullname}
-          </h2>
+          </Dialog.Title>
           <button className="text-zinc-500 hover:text-zinc-800 dark:hover:text-white" onClick={handleClose}>
             <Image src={Close} alt="Close" width={20} height={20} />
           </button>

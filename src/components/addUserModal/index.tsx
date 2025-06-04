@@ -20,7 +20,7 @@ export default function AddUserModal({ dataDialog, open, handleOpen }: {
           <Dialog.Title>Edit User Profile</Dialog.Title>
         </VisuallyHidden>
 
-        <Dialog.Content
+        <Dialog.Content aria-describedby={undefined} 
           style={{ maxWidth: '1000px', maxHeight: '90vh', width: '100%' }}
           className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
       bg-white dark:bg-zinc-600 rounded-[6px] border-[var(--border-color-1)] shadow-[0_2px_8px_rgba(0,0,0,0.05)] p-11 z-50"
