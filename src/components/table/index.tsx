@@ -14,7 +14,7 @@ import CustomCheckbox from "../checkbox";
  * @param {(checked: boolean) => void} props.handleAllItemSelect - Callback for toggling all checkboxes
  * @returns {React.ReactNode} Rendered table component
  */
-export default function Table({ header, data, failedDataMessage, checked, handleAllItemSelect }: TableProps) {
+export default function Table({ header, data, failedDataMessage, checked, handleAllItemSelect,}: TableProps) {
 
   //check if the table has a vertical scroll
   const [isScrollY, setIsScrollY] = React.useState(false);
@@ -85,6 +85,7 @@ export default function Table({ header, data, failedDataMessage, checked, handle
             </th>))}
         </tr>
       </thead>
+      
       <tbody className={styles.tableBody}>
         {data ? data.map((item, index) => (
           <tr className={styles.tableRow} key={index}>

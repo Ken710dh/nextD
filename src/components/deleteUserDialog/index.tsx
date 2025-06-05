@@ -22,9 +22,7 @@ export default function DeleteUserDialog({ userSelectedToDelete, handleClose, on
   return (
     <>
       <div className="fixed top-1/2 left-1/2 z-50 transform -translate-x-1/2 -translate-y-1/2
-          bg-white dark:bg-zinc-600 rounded-[6px] border-[1px] border-[var(--background-color-1)]  p-11"
-
-      >
+          bg-white dark:bg-zinc-600 rounded-[6px] border-[1px] border-[var(--background-color-1)]  p-11">
         <div className="flex justify-between items-center mb-4">
           <Dialog.Title className="text-lg font-semibold text-zinc-800 dark:text-zinc-100">
             Confirm Delete {userSelectedToDelete.fullname}

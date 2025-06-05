@@ -1,12 +1,13 @@
 
 export type UserProfile = {
+  id: number
+  userId: string,
   fullname: string,
   email: string,
   roleuser: string,
   status: string,
   lastLogin: string, 
   createAt: string,
-  password: string
   
 }
 
@@ -22,6 +23,4 @@ export type UserProfileForm = {
   email: string,
   roleuser: string,
   status: string,
-  password: string,
-  confirmpassword: string,
 }

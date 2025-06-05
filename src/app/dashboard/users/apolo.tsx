@@ -6,7 +6,7 @@ export const GET_USERS = gql`
   query GetUsers {
     allUsers {
       nodes {
-        id
+        userId
         fullname
         email
         roleuser
@@ -20,11 +20,11 @@ export const GET_USERS = gql`
 `;
 
 export const DELETE_SELECTED_USER = gql`
-  mutation DeleteUserById($input: DeleteUserByIdInput!) {
-    deleteUserById(input: $input) {
+  mutation DeleteUserByUserId($input: DeleteUserByUserIdInput!) {
+    deleteUserByUserId(input: $input) {
       deletedUserId
       user {
-        id
+        userId
       }
     }
   }

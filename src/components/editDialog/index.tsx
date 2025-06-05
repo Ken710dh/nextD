@@ -30,12 +30,10 @@ export function EditModal({ dataDialog, open, handleOpen }: {
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/3 z-40" />
-        <Dialog.Title>Edit User Profile</Dialog.Title>
 
-        <Dialog.Content aria-describedby={undefined}
-          onOpenAutoFocus={(e) => {
-            e.preventDefault();
-          }}
+        <Dialog.Content 
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()}
           style={{ maxWidth: '1000px', maxHeight: '90vh', width: '100%' }}
           className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
         bg-white rounded-[6px] p-11 z-50 border-[var(--border-color-1)]"

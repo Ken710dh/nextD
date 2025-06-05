@@ -9,21 +9,19 @@ export const CREATE_USER = gql`
         email
         roleuser
         status
-        password
       }
     }
   }
 `;
 
-export const UPDATE_USER_BY_EMAIL = gql`
-  mutation UpdateUserByEmail($input: UpdateUserByEmailInput!) {
-    updateUserByEmail(input: $input) {
+export const UPDATE_USER_BY_USER_ID = gql`
+  mutation UpdateUserByUserId($input: UpdateUserByUserIdInput!) {
+    updateUserByUserId(input: $input) {
       user {
         fullname
         email
         roleuser
         status
-        password
       }
     }
   }

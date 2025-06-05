@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useLayoutEffect, useRef, useState } from "react";
 import { HEADER_FIELD } from "./constants";
 import Table from "@/components/table";
 import CustomCheckbox from "@/components/checkbox";
@@ -12,6 +12,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import { DELETE_SELECTED_USER, GET_USERS } from "./apolo";
 import DeleteModal from "@/components/deleteModal";
 import DeleteUserDialog from "@/components/deleteUserDialog";
+import { useScrollContext } from "@/contexts/ScrollContext";
 
 /**
  * A dashboard page for users.
@@ -37,7 +38,7 @@ export default function Users() {
   const [selectedDeleteUser, setSelectedDeleteUser] = useState<User | null>(null);
 
   const { loading, error, data, refetch } = useQuery(GET_USERS);
-  const [deleteUserById] = useMutation(DELETE_SELECTED_USER, {
+  const [deleteUserByUserId] = useMutation(DELETE_SELECTED_USER, {
         refetchQueries: [
           GET_USERS,
           'GetUsers',
@@ -60,9 +61,8 @@ export default function Users() {
    */
   function handleOpenDelete(user: User) {
     setSelectedDeleteUser(user)
+    console.log("Selected user to delete:", user);
     setOpenDelete(true)
-    console.log("Open delete modal to delete");
-
   }
 
   /**
@@ -72,6 +72,8 @@ export default function Users() {
   function handleCloseEdit() {
     setOpenEdit(false)
   }
+
+  
   /**
    * Closes the delete modal by setting the `openDelete` state to false and logs the state of the modal.
    */
@@ -120,17 +122,24 @@ export default function Users() {
   }
 
 const handleDeleteUser = async () => {
-  if (!selectedDeleteUser?.id) return;
-
-  await deleteUserById({
-    variables: {
-      input: {
-        id: selectedDeleteUser.id
-      }
-    },
-  });
-  setOpenDelete(false);
-  setSelectedDeleteUser(null);
+  console.log("Deleting user:", selectedDeleteUser?.userId);
+  if (!selectedDeleteUser?.userId) {
+    console.warn("No user ID provided for deletion.");
+    return;
+  }
+  try {
+    await deleteUserByUserId({
+      variables: {
+        input: {
+          userId: selectedDeleteUser.userId,
+        },
+      },
+    });
+    setOpenDelete(false);
+    setSelectedDeleteUser(null);
+  } catch (error) {
+    console.error("Failed to delete user:", error);
+  }
 };
 
   if (loading) return <p>Loading...</p>;
@@ -142,6 +151,7 @@ const handleDeleteUser = async () => {
         checked={selectedUsers.includes(user.email)}
         onCheckedChange={() => handleItemChange(user.email)}
       />,
+      user_id: user.userId,
       name: user.fullname,
       email: user.email,
       password: user.password,

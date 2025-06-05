@@ -5,8 +5,8 @@ import SelectItem from "../selectItem";
 import { userSchema } from "./schema";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation } from "@apollo/client";
-import { CREATE_USER, UPDATE_USER_BY_EMAIL } from "./apoloclient";
+import { ApolloError, useMutation } from "@apollo/client";
+import { CREATE_USER, UPDATE_USER_BY_USER_ID } from "./apoloclient";
 import { omit } from "lodash";
 import { GET_USERS } from "@/app/dashboard/users/apolo";
 /**
@@ -22,12 +22,17 @@ export default function UserProfileDialog({
   mode,
   handleClose,
   defaultValues,
-  onRefetchUser
 }: UserProfileDialogProps) {
 
+  // GraphQL Mutations For Creating a User
   const [createUser] = useMutation(CREATE_USER, {
+    refetchQueries: [
+      GET_USERS,
+      'GetUsers',
+    ],
   });
-  const [updateUserByEmail] = useMutation(UPDATE_USER_BY_EMAIL, {
+  // GraphQL Mutation For Updating a User by Email
+  const [updateUserByUserId] = useMutation(UPDATE_USER_BY_USER_ID, {
     refetchQueries: [
       GET_USERS,
       'GetUsers',
@@ -35,77 +40,100 @@ export default function UserProfileDialog({
 
   });
 
-  const { handleSubmit, formState: { errors }, control, reset, register, watch } =
+  // React Hook Form
+  const { handleSubmit, setError, formState: { errors, isSubmitting }, control, reset, register, watch } =
     useForm<UserProfileForm>({
       resolver: yupResolver(userSchema), mode: "onBlur", defaultValues: {
         fullname: '',
         email: '',
         roleuser: '',
         status: '',
-        password: '',
-        confirmpassword: '',
       },
     });
   const ROLE_SELECT_OPTION = ['admin', 'teacher', 'student', 'parent'];
   const STATUS_SELECT_OPTION = ['active', 'inactive'];
 
+  // Create a reference to the form element
   const formRef = useRef<HTMLFormElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-
-  useEffect(() => {
-  inputRef.current?.focus(); 
-}, []);
-
-
+  // Watch the values of role fields
   const role = watch('roleuser');
+  // Watch the value of the status field
   const status = watch('status');
 
+  /**
+   * Triggers the form submission programmatically by invoking the native `requestSubmit` method
+   * on the form reference. .
+   */
   const handleCustomSubmit = async () => {
     formRef.current?.requestSubmit();
   };
 
+  /**
+   * Resets the form with default values when the component mounts or when the mode or defaultValues change.
+   * If in edit mode, it populates the form with existing user data.
+   */
   useEffect(() => {
     if (mode === 'edit' && defaultValues) {
-      reset({
-        ...defaultValues,
-        confirmpassword: defaultValues.password || '',
-      });
+      reset(
+        defaultValues
+      );
     } else {
       reset({
         fullname: '',
         email: '',
         roleuser: ROLE_SELECT_OPTION[0],
         status: STATUS_SELECT_OPTION[0],
-        password: '',
-        confirmpassword: '',
       });
     }
   }, [mode, defaultValues]);
 
-
+  /**
+   * Handles the submission of the user profile form.
+   *
+   * Depending on the mode ('add' or 'edit'), this function either creates a new user
+   * or updates an existing user's information. It omits certain fields from the data before
+   * sending the appropriate GraphQL mutation request. After a successful operation, it triggers
+   * a refetch of user data, closes the dialog, and resets the form.
+   *
+   * @param {UserProfileForm} data - The form data containing user profile information.
+   * @returns {Promise<void>} A promise that resolves when the submission is complete.
+   */
 
   const onSubmit = async (data: UserProfileForm) => {
     try {
       if (mode === 'add') {
-        const addUserData = omit(data, ['confirmpassword', '__typename', 'createAt', 'lastLogin']);
-        await createUser({
-          variables: {
-            input: {
-              user: addUserData
-            }
-          },
-        });
+        try {
+          const addUserData = omit(data, ['confirmpassword', '__typename', 'createAt', 'lastLogin']);
+          await createUser({
+            variables: {
+              input: {
+                user: addUserData
+              }
+            },
+          });
+        } catch (err) {
+          const apolloError = err as ApolloError;
+          const gqlError = apolloError?.graphQLErrors?.[0];
+          if (gqlError?.message?.includes("users_email_key")) {
+            setError("email", {
+              type: "server",
+              message: "Email already exists",
+            });
+            return;
+          }
+          console.error("Unexpected error:", err);
+        }
       } else if (mode === 'edit') {
         console.log("data", data);
-        const fieldsToRemove = ['confirmpassword', 'lastLogin', 'createAt', 'id', 'email', '__typename'];
+        const fieldsToRemove = ['confirmpassword', 'lastLogin', 'createAt', 'id', 'userId', '__typename', 'id'];
         const userPatch = omit(data, fieldsToRemove);
         console.log("edited data", userPatch);
-        await updateUserByEmail({
-          variables: { input: { email: data.email, userPatch } },
+        await updateUserByUserId({
+          variables: { input: { userId: defaultValues?.userId, userPatch: userPatch } },
         });
       }
-      onRefetchUser && onRefetchUser();
+      // onRefetchUser && onRefetchUser();
     } catch (error) {
       console.log(error);
     }
@@ -137,26 +165,6 @@ export default function UserProfileDialog({
               className="p-2 rounded border border-gray-300 focus:outline-none focus:border-gray-500 hover:border-gray-700 transition-colors duration-200"
             />
             {errors.email && <small className="text-red-500 text-sm">{errors.email.message}</small>}
-          </div>
-
-          <div className="flex flex-col">
-            <label htmlFor="password">Password</label>
-            <input
-              {...register('password')}
-              placeholder="Enter a password"
-              className="p-2 rounded border border-gray-300 focus:outline-none focus:border-gray-500 hover:border-gray-700 transition-colors duration-200"
-            />
-            {errors.password && <small className="text-red-500 text-sm">{errors.password.message}</small>}
-          </div>
-
-          <div className="flex flex-col">
-            <label htmlFor="confirmpassword">Confirm Password</label>
-            <input
-              {...register('confirmpassword')}
-              placeholder="Confirm password"
-              className="p-2 rounded border border-gray-300 focus:outline-none focus:border-gray-500 hover:border-gray-700 transition-colors duration-200"
-            />
-            {errors.confirmpassword && <small className="text-red-500 text-sm">{errors.confirmpassword.message}</small>}
           </div>
         </div>
 
@@ -234,7 +242,7 @@ export default function UserProfileDialog({
             hover:bg-orange-300 
             active:bg-orange-500 
             cursor-pointer 
-            transition-colors duration-200" onClick={handleCustomSubmit}>{mode === 'edit' ? 'Update' : 'Create'}</button>
+            transition-colors duration-200"  onClick={handleCustomSubmit}>{mode === 'edit' ? 'Update' : 'Create'}</button>
         </div>
 
       </form>
@@ -242,6 +250,18 @@ export default function UserProfileDialog({
   );
 }
 
+/**
+ * Formats a date string in the format "dd/mm/yyyy, HH:MM".
+ *
+ * When the component mounts, it formats the given dateString and sets the
+ * formatted state to the result. If no dateString is given, it leaves the
+ * formatted state as an empty string.
+ *
+ * The component renders a grey rounded box with the formatted date string
+ * inside. If the formatted state is empty, it renders "..." instead.
+ *
+ * @param {{ dateString?: string }} props
+ */
 function FormattedDate({ dateString }: { dateString?: string }) {
   const [formatted, setFormatted] = useState('');
   function formatDateSimple(dateString: string): string {
