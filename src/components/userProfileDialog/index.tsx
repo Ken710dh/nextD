@@ -86,7 +86,7 @@ export default function UserProfileDialog({
         status: STATUS_SELECT_OPTION[0],
       });
     }
-  }, [mode, defaultValues]);
+  }, [mode, defaultValues],);
 
   /**
    * Handles the submission of the user profile form.
