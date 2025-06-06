@@ -4,6 +4,7 @@ import "@radix-ui/themes/styles.css";
 import { ApolloProvider } from '@apollo/client';
 import client from "@/lib/apolo/client";
 import { ScrollProvider } from "@/contexts/ScrollContext";
+import Sidebar from "@/components/sidebar";
 
 export default function RootLayout({
   children,
@@ -15,7 +16,9 @@ export default function RootLayout({
       <body>
         <ScrollProvider>
           <ApolloProvider client={client}>
-            {children}
+            <div className="flex"> <Sidebar />
+              {children}</div>
+
           </ApolloProvider>
         </ScrollProvider>
       </body>

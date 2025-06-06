@@ -10,3 +10,11 @@ export type User = {
   action?: string
   password: string
 }
+export type StringEqualToFilter = {
+  equalTo: string;
+};
+
+export type UserFilter = {
+  roleuser?: StringEqualToFilter;
+  status?: StringEqualToFilter;
+};

@@ -11,7 +11,7 @@ export default function SelectItem({
   label,
   onValueChange
 }: {
-  label: string;
+  label?: string;
   name?: string;
   value: string;
   selectOption: string[];
@@ -23,17 +23,17 @@ export default function SelectItem({
       <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
       <Select.Root value={value} onValueChange={onValueChange} name={name}>
         <Select.Trigger
-          className="inline-flex items-center justify-between w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm hover:border-gray-400 focus:outline-none  focus:border-gray-700"
-          aria-label={label}
-        >
-          <Select.Value/>
+        className="h-[33px] text-gray-700 inline-flex items-center justify-between w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm hover:border-gray-400 focus:outline-non"
+        aria-label={label}
+>
+          <Select.Value className="text-[12px] text-red-500" placeholder={`Filter by ${name}`}/>
           <Select.Icon className="ml-2">
-            <ChevronDownIcon />
+            <ChevronDownIcon className="text-gray-700"/>
           </Select.Icon>
         </Select.Trigger>
         <Select.Portal>
           <Select.Content
-            className="z-50 overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg animate-in fade-in"
+            className="z-50 text-red-500 w-[150px] overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg animate-in fade-in"
             position="popper"
           >
             <Select.Viewport className="p-1">
@@ -42,7 +42,7 @@ export default function SelectItem({
                   <Select.Item
                     key={index}
                     value={item}
-                    className="relative flex cursor-pointer select-none items-center rounded-sm px-3 py-2 text-sm outline-none hover:bg-blue-100 focus:bg-blue-100"
+                    className="relative text-gray-700 flex cursor-pointer select-none items-center rounded-sm px-3 py-2 text-sm outline-none hover:bg-blue-100 focus:bg-blue-100"
                   >
                     <Select.ItemText>{item}</Select.ItemText>
                     <Select.ItemIndicator className="absolute right-2 inline-flex items-center">

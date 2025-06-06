@@ -9,6 +9,7 @@ import { ApolloError, useMutation } from "@apollo/client";
 import { CREATE_USER, UPDATE_USER_BY_USER_ID } from "./apoloclient";
 import { omit } from "lodash";
 import { GET_USERS } from "@/app/dashboard/users/apolo";
+import { ROLE_SELECT_OPTION, STATUS_SELECT_OPTION } from "@/constants";
 /**
  * A dialog component to display user profile information.
  *
@@ -22,22 +23,14 @@ export default function UserProfileDialog({
   mode,
   handleClose,
   defaultValues,
+  onRefetchUser,
 }: UserProfileDialogProps) {
 
   // GraphQL Mutations For Creating a User
   const [createUser] = useMutation(CREATE_USER, {
-    refetchQueries: [
-      GET_USERS,
-      'GetUsers',
-    ],
   });
   // GraphQL Mutation For Updating a User by Email
   const [updateUserByUserId] = useMutation(UPDATE_USER_BY_USER_ID, {
-    refetchQueries: [
-      GET_USERS,
-      'GetUsers',
-    ],
-
   });
 
   // React Hook Form
@@ -50,8 +43,6 @@ export default function UserProfileDialog({
         status: '',
       },
     });
-  const ROLE_SELECT_OPTION = ['admin', 'teacher', 'student', 'parent'];
-  const STATUS_SELECT_OPTION = ['active', 'inactive'];
 
   // Create a reference to the form element
   const formRef = useRef<HTMLFormElement>(null);
@@ -133,7 +124,7 @@ export default function UserProfileDialog({
           variables: { input: { userId: defaultValues?.userId, userPatch: userPatch } },
         });
       }
-      // onRefetchUser && onRefetchUser();
+      onRefetchUser && onRefetchUser();
     } catch (error) {
       console.log(error);
     }
