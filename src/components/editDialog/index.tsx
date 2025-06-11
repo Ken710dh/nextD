@@ -2,6 +2,7 @@ import * as React from 'react';
 import Image from 'next/image';
 import Edit from '@/assets/edit-icon.svg';
 import * as Dialog from '@radix-ui/react-dialog'
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 
 /**
  * A modal component for editing user information.
@@ -24,7 +25,7 @@ export function EditModal({ dataDialog, open, handleOpen }: {
     <Dialog.Root open={open} onOpenChange={handleOpen}>
       <Dialog.Trigger asChild>
         <button>
-          <Image src={Edit} width={20} height={20} alt="Edit" />
+          <Image src={Edit} width={25} height={25} alt="Edit" />
         </button>
       </Dialog.Trigger>
 
@@ -38,6 +39,9 @@ export function EditModal({ dataDialog, open, handleOpen }: {
           className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
         bg-white rounded-[6px] p-11 z-50 border-[var(--border-color-1)]"
         >
+        <VisuallyHidden.Root>
+          <Dialog.Title>Edit User Profile</Dialog.Title>
+        </VisuallyHidden.Root>
           {dataDialog}
         </Dialog.Content>
       </Dialog.Portal>

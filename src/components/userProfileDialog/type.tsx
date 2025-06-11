@@ -23,4 +23,6 @@ export type UserProfileForm = {
   email: string,
   roleuser: string,
   status: string,
+  password?: string | null,
+  confirmpassword?: string | null
 }

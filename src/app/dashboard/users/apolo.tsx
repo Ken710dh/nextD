@@ -14,8 +14,12 @@ export const DELETE_SELECTED_USER = gql`
 `;
 
 export const GET_USERS = gql`
-  query GetUsers($filter: UserFilter) {
-  allUsers( filter: $filter ) {
+  query GetUsers($filter: UserFilter, $first: Int, $offset: Int) {
+  allUsers( 
+    first: $first,
+    offset: $offset,
+    filter: $filter,
+  ) {
     nodes {
       userId
       fullname
@@ -25,6 +29,7 @@ export const GET_USERS = gql`
       status
       createAt
     }
+    totalCount
   }
 }
 `;

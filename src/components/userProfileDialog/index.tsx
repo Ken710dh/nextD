@@ -3,13 +3,15 @@ import React, { useEffect, useRef, useState } from "react";
 import { UserProfileDialogProps, UserProfileForm } from "./type";
 import SelectItem from "../selectItem";
 import { userSchema } from "./schema";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ApolloError, useMutation } from "@apollo/client";
 import { CREATE_USER, UPDATE_USER_BY_USER_ID } from "./apoloclient";
 import { omit } from "lodash";
 import { GET_USERS } from "@/app/dashboard/users/apolo";
 import { ROLE_SELECT_OPTION, STATUS_SELECT_OPTION } from "@/constants";
+import InputField from "../inputfields";
+import { toast } from "react-toastify";
 /**
  * A dialog component to display user profile information.
  *
@@ -33,24 +35,43 @@ export default function UserProfileDialog({
   const [updateUserByUserId] = useMutation(UPDATE_USER_BY_USER_ID, {
   });
 
+
   // React Hook Form
   const { handleSubmit, setError, formState: { errors, isSubmitting }, control, reset, register, watch } =
     useForm<UserProfileForm>({
-      resolver: yupResolver(userSchema), mode: "onBlur", defaultValues: {
-        fullname: '',
-        email: '',
-        roleuser: '',
-        status: '',
-      },
+      resolver: yupResolver(userSchema(mode)) as Resolver<UserProfileForm>, mode: "onBlur", defaultValues: getDefaultValues(),
     });
+
+  function getDefaultValues() {
+    if (mode === 'edit' && defaultValues) {
+      return {
+        fullname: defaultValues.fullname || '',
+        email: defaultValues.email || '',
+        roleuser: defaultValues.roleuser || ROLE_SELECT_OPTION[0],
+        status: defaultValues.status || STATUS_SELECT_OPTION[0],
+        password: '',
+        confirmpassword: '',
+      };
+    }
+
+    return {
+      fullname: '',
+      email: '',
+      password: '',
+      confirmpassword: '',
+      roleuser: ROLE_SELECT_OPTION[0],
+      status: STATUS_SELECT_OPTION[0],
+    };
+  };
 
   // Create a reference to the form element
   const formRef = useRef<HTMLFormElement>(null);
-
   // Watch the values of role fields
   const role = watch('roleuser');
   // Watch the value of the status field
   const status = watch('status');
+
+  console.log('role', role), console.log('status', status);
 
   /**
    * Triggers the form submission programmatically by invoking the native `requestSubmit` method
@@ -73,6 +94,8 @@ export default function UserProfileDialog({
       reset({
         fullname: '',
         email: '',
+        password: '',
+        confirmpassword: '',
         roleuser: ROLE_SELECT_OPTION[0],
         status: STATUS_SELECT_OPTION[0],
       });
@@ -103,6 +126,7 @@ export default function UserProfileDialog({
               }
             },
           });
+          toast.success("User created successfully.");
         } catch (err) {
           const apolloError = err as ApolloError;
           const gqlError = apolloError?.graphQLErrors?.[0];
@@ -114,15 +138,22 @@ export default function UserProfileDialog({
             return;
           }
           console.error("Unexpected error:", err);
+          toast.error("Failed to create user");
         }
       } else if (mode === 'edit') {
         console.log("data", data);
-        const fieldsToRemove = ['confirmpassword', 'lastLogin', 'createAt', 'id', 'userId', '__typename', 'id'];
+        const fieldsToRemove = ['password', 'confirmpassword', 'lastLogin', 'createAt', 'id', 'userId', '__typename', 'id'];
         const userPatch = omit(data, fieldsToRemove);
         console.log("edited data", userPatch);
-        await updateUserByUserId({
+        try {
+          await updateUserByUserId({
           variables: { input: { userId: defaultValues?.userId, userPatch: userPatch } },
         });
+        toast.success("User updated successfully.");
+        } catch (err) {
+          console.error("Unexpected error:", err);
+          toast.error("Failed to update user");
+        }
       }
       onRefetchUser && onRefetchUser();
     } catch (error) {
@@ -138,66 +169,45 @@ export default function UserProfileDialog({
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-2 gap-4 p-4 text-base">
-          <div className="flex flex-col">
-            <label htmlFor="fullname">Name</label>
-            <input
-              {...register('fullname')}
-              placeholder="Enter the name here"
-              className="p-2 rounded border border-gray-300 focus:outline-none focus:border-gray-500 hover:border-gray-700 transition-colors duration-200"
-            />
-            {errors.fullname && <small className="text-red-500 text-sm">{errors.fullname.message}</small>}
-          </div>
-
-          <div className="flex flex-col">
-            <label htmlFor="email">Email</label>
-            <input
-              {...register('email')}
-              placeholder="Enter an email"
-              className="p-2 rounded border border-gray-300 focus:outline-none focus:border-gray-500 hover:border-gray-700 transition-colors duration-200"
-            />
-            {errors.email && <small className="text-red-500 text-sm">{errors.email.message}</small>}
-          </div>
+          <InputField
+            label="Full Name"
+            placeholder="Enter your full name"
+            type="text"
+            register={register('fullname')}
+            error={errors.fullname}
+          />
+          <InputField
+            label="Email"
+            placeholder="Enter your email"
+            type="email"
+            register={register('email')}
+            error={errors.email}
+          />
         </div>
-
-        {mode === 'edit' ? (
-          role && status ? (
-            <div className="flex gap-4 p-4 text-base flex-col">
-              <div className="flex flex-row  gap-4">
-                <Controller
-                  control={control}
-                  name="roleuser"
-                  render={({ field }) => (
-                    <SelectItem
-                      label="Role"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      selectOption={ROLE_SELECT_OPTION}
-                    />
-                  )}
-                />
-                {errors.roleuser && <p className="text-red-500 text-sm">{errors.roleuser.message}</p>}
-                <Controller
-                  control={control}
-                  name="status"
-                  render={({ field }) => (
-                    <SelectItem label="Status" value={field.value} selectOption={STATUS_SELECT_OPTION} onValueChange={field.onChange} />
-                  )} />
-              </div>
-              <div className="flex flex-row gap-4 text-sm text-gray-500">
-                <div className="flex flex-col w-1/2">
-                  <label className="font-medium">Last login:</label>
-                  <FormattedDate dateString={defaultValues?.lastLogin} />
-                </div>
-                <div className="flex flex-col w-1/2">
-                  <label className="font-medium">Created at:</label>
-                  <FormattedDate dateString={defaultValues?.createAt} />
-                </div>
-              </div>
-
+        {mode === 'add' && (
+          <div className="flex flex-row gap-4 p-4">
+            <div className="w-1/2">
+              <InputField
+                label="Password"
+                placeholder="Enter your password"
+                type="password"
+                register={register('password')}
+                error={errors.password}
+              />
             </div>
-          ) : null
-        ) : (
-          <div className="flex gap-4 p-4 text-base">
+            <div className="w-1/2">
+              <InputField
+                label="Confirm Password"
+                placeholder="Confirm your password"
+                type="password"
+                register={register('confirmpassword')}
+                error={errors.confirmpassword}
+              />
+            </div>
+          </div>
+        )}
+        <div className="flex flex-row gap-4 p-4">
+          <div className="w-1/2 h-[42px]">
             <Controller
               control={control}
               name="roleuser"
@@ -205,23 +215,37 @@ export default function UserProfileDialog({
                 <SelectItem
                   label="Role"
                   value={field.value}
-                  selectOption={ROLE_SELECT_OPTION} onValueChange={field.onChange}
-                />)}
+                  onValueChange={field.onChange}
+                  selectOption={ROLE_SELECT_OPTION}
+                  height="h-[42px]"
+                />
+              )}
             />
+            {errors.roleuser && <p className="text-red-500 text-sm">{errors.roleuser.message}</p>}
+          </div>
+          <div className="w-1/2">
             <Controller
               control={control}
               name="status"
               render={({ field }) => (
-                <SelectItem
-                  label="Status"
-                  value={field.value}
-                  selectOption={STATUS_SELECT_OPTION} onValueChange={field.onChange}
-                />
+                <SelectItem label="Status" value={field.value} selectOption={STATUS_SELECT_OPTION} onValueChange={field.onChange} height="h-[42px]" />
               )} />
+            {errors.status && <p className="text-red-500 text-sm">{errors.status.message}</p>}
+          </div>
+        </div>
+        {mode === 'edit' && defaultValues && (
+          <div className="flex flex-row gap-4 p-4 text-sm">
+            <div className="flex flex-col w-1/2">
+              <label className="font-medium">Last login:</label>
+              <FormattedDate dateString={defaultValues?.lastLogin} />
+            </div>
+            <div className="flex flex-col w-1/2">
+              <label className="font-medium">Created at:</label>
+              <FormattedDate dateString={defaultValues?.createAt} />
+            </div>
           </div>
         )}
-
-        <div className="flex gap-4 justify-end">
+        <div className="flex gap-4 p-4 justify-end">
           <button className=" px-4 py-2 rounded 
             bg-gray-200 text-gray-800 
             hover:bg-orange-200 

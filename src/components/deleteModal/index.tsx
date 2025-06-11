@@ -23,7 +23,7 @@ export default function DeleteModal({ open, handleOpen, deleteUserDialog
   deleteUserDialog: React.ReactNode
 }) {
   return (
-    <Dialog.Root open={open} onOpenChange={handleOpen}>
+    <Dialog.Root  onOpenChange={handleOpen} open={open}>
       <Dialog.Trigger>
         <Image src={Delete} alt=""style={{height: '25px', width: '25px'}}/>
       </Dialog.Trigger>

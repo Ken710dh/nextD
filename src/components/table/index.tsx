@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { TableHeaderProps, TableProps } from "./type";
 import styles from './styles.module.css';
 import CustomCheckbox from "../checkbox";
+import { BoxIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 /**
  * Scrollable table component with sticky headers and "select all" functionality.
  *
@@ -14,7 +15,7 @@ import CustomCheckbox from "../checkbox";
  * @param {(checked: boolean) => void} props.handleAllItemSelect - Callback for toggling all checkboxes
  * @returns {React.ReactNode} Rendered table component
  */
-export default function Table({ header, data, failedDataMessage, checked, handleAllItemSelect,}: TableProps) {
+export default function Table({ header, data, failedDataMessage, checked, handleAllItemSelect, }: TableProps) {
 
   //check if the table has a vertical scroll
   const [isScrollY, setIsScrollY] = React.useState(false);
@@ -77,7 +78,7 @@ export default function Table({ header, data, failedDataMessage, checked, handle
               {item.header === "checkbox" ? (
                 <CustomCheckbox
                   checked={checked}
-                  onCheckedChange ={handleAllItemSelect}
+                  onCheckedChange={handleAllItemSelect}
                 />
               ) : (
                 item.isCellTable ? item.cellTable : item.label
@@ -85,20 +86,30 @@ export default function Table({ header, data, failedDataMessage, checked, handle
             </th>))}
         </tr>
       </thead>
-      
+
       <tbody className={styles.tableBody}>
-        {data ? data.map((item, index) => (
-          <tr className={styles.tableRow} key={index}>
-            {header.map((key, index) => (
-              <td className={styles.tableItem} style={getCellStyling(key)} key={index}>
-                {item[key.header] as React.ReactNode}
-              </td>
-            ))}
-          </tr>
-        )) : (
-          <div>
-            <p>{failedDataMessage}</p>
-          </div>
+        {data && data.length > 0 ? data.map((item: any, rowIndex: number) => {
+          const isLastRow = rowIndex === data.length - 1;
+          return (
+            <tr
+              className={styles.tableRow}
+              style={isLastRow && isScrollY  ? { borderBottom: "none" } : undefined}
+              key={rowIndex}
+            >
+              {header.map((key: TableHeaderProps, colIndex: number) => (
+                <td className={styles.tableItem} style={getCellStyling(key)} key={colIndex}>
+                  {item[key.header] as React.ReactNode}
+                </td>
+              ))}
+            </tr>
+          );
+        }) : (
+                <tr className="p-6 text-center text-gray-600 h-full bg-gray-50 shadow-sm flex items-center justify-center">
+                  <td className="flex flex-col items-center mb-4 py-4 px-4 w-[fit-content] h-[fit-content] border border-dashed rounded-xl">
+                    <BoxIcon className="w-6 h-6 text-yellow-400" />
+                    <p className="text-lg font-medium">{failedDataMessage}</p>
+                  </td>
+                </tr>
         )}
       </tbody>
     </table >

@@ -16,7 +16,7 @@ import * as Dialog from '@radix-ui/react-dialog'
  * @returns {React.ReactElement} The dialog component.
  */
 export default function DeleteUserDialog({ userSelectedToDelete, handleClose, onConfirm }:
-  { userSelectedToDelete: UserProfile , 
+  { userSelectedToDelete: UserProfile | null, 
     handleClose: () => void, 
     onConfirm: () => void }) {
   return (
@@ -25,7 +25,7 @@ export default function DeleteUserDialog({ userSelectedToDelete, handleClose, on
           bg-white dark:bg-zinc-600 rounded-[6px] border-[1px] border-[var(--background-color-1)]  p-11">
         <div className="flex justify-between items-center mb-4">
           <Dialog.Title className="text-lg font-semibold text-zinc-800 dark:text-zinc-100">
-            Confirm Delete {userSelectedToDelete.fullname}
+            Confirm Delete {userSelectedToDelete?.fullname}
           </Dialog.Title>
           <button className="text-zinc-500 hover:text-zinc-800 dark:hover:text-white" onClick={handleClose}>
             <Image src={Close} alt="Close" width={20} height={20} />

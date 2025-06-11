@@ -9,7 +9,7 @@ export default function AddUserModal({ dataDialog, open, handleOpen }: {
   return (
     <Dialog.Root open={open} onOpenChange={handleOpen}>
       <Dialog.Trigger asChild>
-        <button  className="w-[100px] h-[33px] rounded-md border text-white border-gray- bg-orange-500 px-3 text-sm shadow-sm hover:border-orange-600 focus:outline-none  focus:border-gray-70 self-end">
+        <button  className="w-[100px] h-[33px] rounded-md border text-white border-gray- bg-[#E64B50] px-3 text-sm shadow-sm hover:border-orange-600 focus:outline-none  focus:border-gray-70 self-end">
           Add
         </button>
       </Dialog.Trigger>

@@ -6,6 +6,8 @@
   --font-sans: "Nunito", sans-serif;
   --background-color-1: rgba(226, 232, 240, 1);
   --background-color-2: rgba(58, 112, 192, 1);
+  --success-color: #54a73f;
+  --warning-color: #d0021b;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -17,6 +19,24 @@
     --background-color-2: rgba(58, 112, 192, 1);
   }
 }
+
+@layer utilities {
+  @media (max-width: 1440px) {
+    .w-responsive {
+      width: 1200px;
+    }
+  }
+
+  @media (min-width: 1441px) {
+    .w-responsive {
+      width: 1400px;
+    }
+    .m-responsive{
+      margin: 0 5vw;
+    }
+  }
+}
+
 
 body {
   color: rgb(var(--foreground-rgb));
